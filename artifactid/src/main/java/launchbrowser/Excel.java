@@ -1,202 +1,226 @@
 package launchbrowser;
 
-import java.io.File;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.util.NumberToTextConverter;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
+import com.aventstack.extentreports.Status;
+
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Iterator;
+import java.time.Duration;
 
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.ss.usermodel.*;
 
-import org.apache.poi.ss.usermodel.CellType;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 
 public class Excel {
-	String xlFilePath;
 
-	XSSFWorkbook wb;
-	XSSFSheet sheet;
-	HashMap<String, Integer> colNums = null;
-	FileInputStream fis = null;
-
-	public Excel(String filePath) {
-		this.xlFilePath = filePath;
-		try {
-			fis = new FileInputStream(new File(this.xlFilePath));
-			System.out.println("File Input Stream Created successfully..");
-			wb = new XSSFWorkbook(fis);
-
-		}
-
-		catch (IOException e) {
-			e.printStackTrace();
-
-		}
-	}
-
-//Provide sheet name
-
-	public void setSheet(String sheetName) {
-		sheet = wb.getSheet(sheetName);
-		populateColumnNums(); // Call populateColumnNums to initialize colNums
-	}
-
-//Populates the column and rows number
-
-	public void populateColumnNums() {
-		colNums = new HashMap<String, Integer>(); // Initialize the HashMap
-
-		int colIndex = 0;
-		Row row = sheet.getRow(0);
-
-		if (row != null) {
-			Iterator<Cell> cells = row.cellIterator();
-
-			while (cells.hasNext()) {
-				Cell cell = cells.next();
-				String colName = cell.getStringCellValue();
-				colNums.put(colName, colIndex);
-				colIndex++;
-			}
-		}
-	}
-
-//get column name
-
-	public int getColNumber(String ColName) {
-		return colNums.get(ColName);
-
-	}
-
-//get cell data
-	public String getCellData(int rowNum, String colName) {
-		String ret = "";
-		int colNum = getColNumber(colName);
-		ret = getCellData(rowNum, colNum);
-		return ret;
-
-	}
-
-//Another method for particular rows and columns data
-
-	public String getCellData(int rowNum, int colNUm)
-
-	{
-		String ret = "";
-
-		try {
-			Row row = sheet.getRow(rowNum);
-			Cell cell = row.getCell(colNUm);
-
-			if (cell.getCellType() == CellType.STRING)
-
-			{
-				ret = cell.getStringCellValue();
-
-			}
-		}
-
-		catch (Exception e)
-
-		{
-			e.printStackTrace();
-
-		}
-
-		return ret;
-
-	}
-
-	public void readSheetData() {
-		// if (sheet != null) {
-		java.util.Iterator<Row> rows = sheet.iterator();
-
-		while (rows.hasNext()) {
-			Row currRow = rows.next();
-
-			Iterator<Cell> cells = currRow.cellIterator();
-
-			while (cells.hasNext()) {
-				Cell currCell = cells.next();
-				CellType ctype = currCell.getCellType();
-
-				String value = "";
-				if (ctype == CellType.STRING)
-
-				{
-					value = currCell.getStringCellValue();
-
-				}
-
-				else if (ctype == CellType.NUMERIC) {
-
-					value = "" + currCell.getDateCellValue();
-				}
-
-				System.out.println("Value for cell: " + value);
-
-			}
-
-		}
-
-	}
-
-	private void next() {
-		// TODO Auto-generated method stub
-
-	}
-
-	public static void main(String rs[]) {
-
-		// Provide the absolute path of your Excel file
-		String filePath = "/home/user/Documents/artifactid (copy)/files/AutomationData.xlsx";
-
-		// Print the absolute path to the console
-		System.out.println("Absolute Path: " + new File(filePath).getAbsolutePath());
-		System.out.println("Working Directory: " + System.getProperty("user.dir"));
-		System.out.println("File path length: " + filePath.length());
-
-		// Create an instance of Excel class with the file path
-		Excel xl = new Excel(filePath);
-		// xl.readSheetData();
-
-		// Set the sheet name (assuming it's "Data")
-		xl.setSheet("Data");
-
-		// Read and print data from the Excel file if the sheet is not null
-		if (xl.sheet != null) {
-			xl.readSheetData();
-
-		}
-	}
+	private static final String[] MedicationData = new String[2];
 
 
-public void close()
-{
-	try {
-		
-		if (fis!= null)
-		{
-			fis.close();
-			wb.close();
-			
-		}
-	}
-	catch(Exception e)
-	{
-		
-	}
-}
+	public static void main(String[] args) throws InterruptedException {
+        String excelFilePath = "/home/user/Documents/artifactid/files/LoginCred.xlsx";
+        String sheetName = "Credentials";
 
+        try {
+        	String[] loginData = readLoginDataFromExcel(excelFilePath, sheetName);
+            readMedicationDataFromExcel(excelFilePath, sheetName);
+            
+            System.out.println("URL: " + loginData[0]);
+            System.out.println("Location: " + loginData[1]);
+            System.out.println("Username: " + loginData[2]);
+            System.out.println("Password: " + loginData[3]);
+            System.out.println("medication name: " + MedicationData[0]);
+            System.out.println("quantity: " + MedicationData[1]);
+
+            WebDriver driver = new ChromeDriver();
+            driver.manage().window().maximize();
+
+            // Use the URL read from Excel
+            driver.get(loginData[0]);
+            
+           
+
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5000));
+
+            WebElement locationInput = driver.findElement(By.xpath("//input[@placeholder='Location']"));
+            locationInput.sendKeys(loginData[1]); // Location from Excel
+            
+            
+
+            WebElement locationOption = wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//p[@class='drug-search-result' and text()='" + loginData[1] + "']")));
+            locationOption.click();
+
+            WebElement usernameField = driver.findElement(By.xpath("//input[@placeholder='Username/email']"));
+            usernameField.sendKeys(loginData[2]); // Username from Excel
+
+            WebElement passwordField = driver.findElement(By.xpath("//input[@placeholder='Password']"));
+            passwordField.sendKeys(loginData[3]); // Password from Excel
+
+            WebElement loginBtn = driver.findElement(By.xpath("//p[@class='blue-button']"));
+            loginBtn.click();
+
+            // Continue with the rest of your test...
+            WebElement dropdown = wait.until(ExpectedConditions
+    				.elementToBeClickable(By.xpath("//span[@class='p-dropdown-trigger-icon pi pi-chevron-down']")));
+    		dropdown.click();
+
+    		WebElement dropdown1 = wait
+    				.until(ExpectedConditions.elementToBeClickable(By.xpath("//li[contains(@aria-label,'Pharmacy')]")));
+    		dropdown1.click();
+
+    		Thread.sleep(2000);
+
+    		WebElement selectlocationbtn = wait
+    				.until(ExpectedConditions.elementToBeClickable(By.xpath("//p[@class='blue-button']")));
+    		selectlocationbtn.click();
+
+    		Thread.sleep(2000);
+    		
+    		
+
+// Transfer In Process
+    		
+            WebElement transferInBtn = wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//button[normalize-space()='Transfer In']")));
+            transferInBtn.click();
+
+            Thread.sleep(2000);
+
+            WebElement locationToReceiveFromInput = wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//input[@placeholder='Type in location to receive from']")));
+            locationToReceiveFromInput.sendKeys("Emergency Ward");
+
+            WebElement locationDropdown = wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//span[@class='p-dropdown-trigger-icon pi pi-chevron-down']")));
+            locationDropdown.click();
+
+            Thread.sleep(2000);
+
+            WebElement locationSelect = wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//li[@aria-label='Emergency Ward']")));
+            locationSelect.click();
+
+            WebElement notesInput = wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//textarea[@id='note-modal']")));
+            notesInput.sendKeys("Notes Will be here");
+
+            WebElement imprestBtn = wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//p[normalize-space()='Imprest/Emergency Meds/Ward Stock']")));
+            imprestBtn.click();
+
+            Thread.sleep(2000);
+
+            WebElement medicationInput = wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//input[@placeholder='Select Medication']")));
+            medicationInput.sendKeys(MedicationData[0]);
+            Thread.sleep(2000);
+            
+
+            WebElement selectMedication = wait.until(ExpectedConditions.elementToBeClickable(By.xpath("/html[1]/body[1]/div[2]/div[1]/ul[1]/li[1]")));
+            selectMedication.click();
+
+            Thread.sleep(2000);
+
+            WebElement quantityInput = wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//input[@placeholder='Qty...']")));
+            quantityInput.sendKeys(MedicationData[1]);
+
+            WebElement addBtn = wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//p[@class='blue-button']")));
+            addBtn.click();
+
+            Thread.sleep(2000);
+
+            WebElement receiveTransferBtn = wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//p[normalize-space()='Receive Transfer']")));
+            receiveTransferBtn.click();
+
+            Thread.sleep(2000);
+
+            WebElement passwordInput = wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//input[@placeholder='Password']")));
+            passwordInput.sendKeys("1111");
+
+            Thread.sleep(2000);
+
+            WebElement signInBtn = wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//div[@class='green-button']")));
+            signInBtn.click();
+
+            Thread.sleep(2000);
+
+            WebElement completeBtn = wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//h3[normalize-space()='Complete']")));
+            completeBtn.click();
+
+            Thread.sleep(2000);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+        
+private static String[] readLoginDataFromExcel(String filePath, String sheetName) throws IOException {
+    String[] loginData = new String[4];
+
+    FileInputStream excelFile = new FileInputStream(new File(filePath));
+    Workbook workbook = WorkbookFactory.create(excelFile);
+    Sheet sheet = workbook.getSheet(sheetName);
+
+    Row row = sheet.getRow(1); // Assuming login data is in the second row (index 1)
+    for (int i = 0; i < 4; i++) {
+        Cell cell = row.getCell(i);
+        loginData[i] = cell.getStringCellValue();
+    }
+
+    workbook.close();
+    excelFile.close();
+
+    return loginData;
 }
 
 
+private static void readMedicationDataFromExcel(String filePath, String sheetName) throws IOException {
+    FileInputStream excelFile = new FileInputStream(new File(filePath));
+    Workbook workbook = WorkbookFactory.create(excelFile);
+    Sheet sheet = workbook.getSheet(sheetName);
+
+    Row row = sheet.getRow(1); // Assuming medication data is in the second row (index 1)
+
+    // Assuming medication name is in column 4 (index 3)
+    Cell medicationNameCell = row.getCell(4);
+    MedicationData[0] = getCellValueAsString(medicationNameCell);
+
+    // Assuming quantity is in column 5 (index 4)
+    Cell quantityCell = row.getCell(5);
+    MedicationData[1] = getCellValueAsString(quantityCell);
+
+    workbook.close();
+    excelFile.close();
+}
+
+private static String getCellValueAsString(Cell cell) {
+    if (cell == null) {
+        return null;
+    }
+
+    switch (cell.getCellType()) {
+        case STRING:
+            return cell.getStringCellValue();
+        case NUMERIC:
+            // Check if the cell is formatted as a date
+            if (DateUtil.isCellDateFormatted(cell)) {
+                // Convert date to string based on your format
+                return cell.getLocalDateTimeCellValue().toString();
+            } else {
+                // Convert numeric value to string
+                return NumberToTextConverter.toText(cell.getNumericCellValue());
+            }
+        default:
+            return null;
+    }
+}
 
 
-
+}
 
 
 
