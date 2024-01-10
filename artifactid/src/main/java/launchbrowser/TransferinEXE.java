@@ -20,6 +20,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.FluentWait;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import com.aventstack.extentreports.Status;
@@ -34,7 +35,7 @@ public class TransferinEXE {
 
 	static int valueToCompare = 0;
 	
-	public static List<String> drugNames;
+	//public static List<String> drugNames;
 	public static List<String> Innumbers;
 	public static List<String> location;
 	
@@ -104,13 +105,13 @@ public class TransferinEXE {
 	
 
 	public static  void run() throws InterruptedException {
-		List<String> drugNames = readDrugNamesFromExcel(
-				"/home/user/Documents/artifactid/files/MedicationData.xlsx");
+		//List<String> drugNames = readDrugNamesFromExcel(
+			//	"/home/user/Documents/artifactid/files/MedicationData.xlsx");
 
 		
 		System.out.println("--------");
 
-		System.out.println(drugNames.size());
+	//	System.out.println(drugNames.size());
 		
 		System.out.println("--------");
 
@@ -147,8 +148,8 @@ public class TransferinEXE {
 		
 		
 
-if (searchCount == 1)
-{
+//if (searchCount == 1)
+//{
 	WebElement stock = driver.findElement( By.xpath("//p[normalize-space()='Stock']"));
 	stock.click();
 	Thread.sleep(2000);
@@ -158,27 +159,31 @@ if (searchCount == 1)
 	Thread.sleep(2000);
 
 	WebElement medication = driver.findElement((By.xpath("//input[@placeholder='Medication...']")));
+	medication.click();
+	
+//	drugNames = readDrugNamesFromExcel(
+//			"/home/user/Documents/artifactid/files/MedicationData.xlsx");
 
-	drugNames = readDrugNamesFromExcel(
-			"/home/user/Documents/artifactid/files/MedicationData.xlsx");
+	//String drugName = drugNames.get(searchCount);
 
-	String drugName = drugNames.get(searchCount);
-
-	medication.sendKeys(drugName);
-
+	
+//	medication.sendKeys(drugName);
+	medication.sendKeys("guaifenesin 100 mg/5 mL oral liquid");
 	Thread.sleep(2000);
 
 	WebElement displayInStock = driver.findElement((By.xpath("//p[@class='active-select-filter select-filter-item']")));
 	displayInStock.click();
 
-	WebElement searching = driver.findElement((By.xpath("//button[@class='button submit-button']")));
-	searching.click();
+	
 
 	WebElement displayImprest = driver.findElement((By.xpath("//p[normalize-space()='Display Imprest Only']")));
 	displayImprest.click();
 
 	Thread.sleep(3000);
 
+	WebElement searching = driver.findElement((By.xpath("//button[@class='button submit-button']")));
+	searching.click();
+	
 	WebElement expected = driver.findElement((By.xpath("(//td)[4]")));
 
 	String openBalance = expected.getText().trim();
@@ -192,13 +197,6 @@ if (searchCount == 1)
 
 	System.out.println("(Stock): " + valueToCompare);
 
-	Thread.sleep(2000);
-
-
-}
-
-
-	
 
 	Thread.sleep(3000);
 			// Clicking on the Transfer in
@@ -208,8 +206,8 @@ if (searchCount == 1)
 
 			WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(60));
 			
-			wait.until(ExpectedConditions
-					.visibilityOfElementLocated(By.xpath("//div[@class='right-form-section-drug-container']")));
+			//wait.until(ExpectedConditions
+					//.visibilityOfElementLocated(By.xpath("//div[@class='right-form-section-drug-container']")));
 			//wait.until(ExpectedConditions
 					//.visibilityOfElementLocated(By.xpath("//div[@class='right-form-section-drug-container']")));
 
@@ -225,25 +223,6 @@ if (searchCount == 1)
 
 			Thread.sleep(1000);
 
-			// Locate the location options
-//			List<WebElement> dropdownlocation = driver.findElements(By.xpath("//li[contains(@class, 'p-dropdown-item')]"));
-	//
-//			// Iterate through the options to find a match with the drop down location
-//			for (WebElement option : dropdownlocation) {
-	//
-//				int searchCoun2 = 0;
-//				String loc = location.get(searchCoun2);
-	//
-//				if (option.getText().trim().equals(loc)) {
-//					// Found a match, click on the option
-//					Thread.sleep(3000);
-	//
-//					searchCoun2++;
-	//
-//					option.click();
-//					break;
-//				}
-//			}
 
 			WebElement noteTextArea = driver.findElement(By.xpath("//textarea[@name='notes' and @id='note-modal']"));
 
@@ -257,9 +236,9 @@ if (searchCount == 1)
 			WebElement medicationInput = driver.findElement((By.xpath("//input[@placeholder='Select Medication']")));
 			medicationInput.click();
 
-			String drugname1 = drugNames.get(searchCount);
+			//String drugname1 = drugNames.get(searchCount);
 
-			medicationInput.sendKeys(drugname1);
+			medicationInput.sendKeys("guaifenesin 100 mg/5 mL oral liquid");
 
 			wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//input[@placeholder='Select Medication']")));
 
@@ -270,163 +249,63 @@ if (searchCount == 1)
 			WebElement quantityInput =driver.findElement((By.xpath("//input[@placeholder='Qty...']")));
 			quantityInput.click();
 
-			List<String> Quantity = readInnumbers1FromExcel(
-						"/home/user/Documents/artifactid/files/MedicationData.xlsx");
 			
-			 searchCount++;
-			searchCount1++;
+//			List<String> Quantity = readInnumbers1FromExcel(
+//						"/home/user/Documents/artifactid/files/MedicationData.xlsx");
+			
+			// searchCount++;
+			//searchCount1++;
 
 			Thread.sleep(2000);
-			String drugqty = Quantity.get(searchCount1);
+			//String drugqty = Quantity.get(searchCount1);
 
 
 
 			String substringToRemove = ".0";
-			String modifiedString = drugqty.replace(substringToRemove, "");
+			//String modifiedString = drugqty.replace(substringToRemove, "");
 
-			
-			quantityInput.sendKeys(modifiedString);
+			quantityInput.sendKeys("1");
+			//quantityInput.sendKeys(modifiedString);
 			Thread.sleep(2000);
 
-			WebElement addButton = driver.findElement((By.xpath("//p[@class='blue-button']")));
+			System.out.println("before add butoon");
+			
+			WebElement addButton = driver.findElement(By.xpath("//p[@class='blue-button']"));
 			addButton.click();
-			Thread.sleep(2000);
-
-			//System.out.println("Successfully navigated to the Stock tab.");
 			
-			WebElement AddedBalance = wait.until(ExpectedConditions
-					.presenceOfElementLocated(By.xpath("//div[@class='right-form-section-drug-container']//span[1]")));
+			Thread.sleep(6000);
 
-			String add = AddedBalance.getText().trim();
-
-			System.out.println("Out qty =  " + add);
-
-
-				
-				Thread.sleep(2000);
-				
-				
-				int valueToCompare1 = Integer.parseInt(modifiedString);
-				Integer sum = valueToCompare + valueToCompare1;
-				
-				System.out.println("this is one: " + String.valueOf(sum));
-				System.out.println("this is 2nd: " + String.valueOf(valueToCompare));
-				
-				
-				Thread.sleep(2000);
-				
-				run();
-	
-}
-
-	
-	
-
-//	private static void updateValueToCompareInExcel(String filePath, String sheetName, int columnIndex, String value) {
-//		{
-//			try (Workbook workbook = WorkbookFactory.create(new File(filePath))) {
-//				Sheet sheet = workbook.getSheet(sheetName);
-//
-//				// Assuming you want to update the value in the first row
-//				Row row = sheet.getRow(0);
-//
-//				// Check if the row exists before trying to create a cell
-//				if (row == null) {
-//					row = sheet.createRow(0);
-//				}
-//
-//				// Create a cell only for th
-//				//e specified columnIndex
-//				processCell(0, columnIndex, row, value);
-//
-//				// Create a new temporary file
-//				File tempFile = new File(filePath + ".tmp");
-//
-//				try (FileOutputStream outputStream = new FileOutputStream(tempFile)) {
-//					workbook.write(outputStream);
-//				} catch (IOException e) {
-//					e.printStackTrace();
-//				}
-//
-//				// Rename the temporary file to the original file
-//				if (tempFile.renameTo(new File(filePath))) {
-//					System.out.println("File updated successfully.");
-//				} else {
-//					System.err.println("Error updating file.");
-//				}
-//			} catch (IOException e) {
-//				e.printStackTrace();
-//			}
-//			
-//		}
-//		      
-//		
-		
-		
-		  //disconnect kardo aur likhna ki sheet me write karne ka code kar rahi hu baki kal me tume samjh dunga ki kese karna hai? ok? yes ok perfect chalo done bye bye bye tata tata
-
-//		char[] valueToCompare;
-//		char[] sum;   ///ye kya kiya hai??? are value to sum kraya tha fir but ye i think glt h mujhe dekhna pdega pura 
-//		OpeningBalance(
-//				"C:\\Users\\jatav\\Downloads\\artifactid-20231226T175227Z-001\\artifactid\\files\\MedicationData.xlsx",
-//				"MediData", 7, 10, String.valueOf(valueToCompare), String.valueOf(sum));
-	//}
- 
-	
-
-//	catch(IOException e1)
-//	{
-//		e1.printStackTrace();
-//		// Handle the exception appropriately (logging, error messages, etc.)
-//
-//		System.out.println("Successfully navigated to the Stock tab");
-//
-//		// Click on the button with the specified class
-//		FluentWait<WebDriver> wait;
-//		WebElement completeButton = wait.until(
-//				ExpectedConditions.elementToBeClickable(By.xpath("//p[@class='regular-button complete-button']")));
+			System.out.println("Successfully navigated to the Stock tab.");
+			
+	// Click on the button with the specified class
+		//FluentWait<WebDriver> wait1;
+//		WebElement completeButton = driver.findElement(By.xpath("//p[normalize-space()='Receive Transfer']"));
 //		completeButton.click();
-//
-//		// WebElement loader =
-//		// wait.until(ExpectedConditions.invisibilityOfElementLocated(By.xpath("//your-loader-xpath")));
+
 //		Thread.sleep(5000); // Wait for 5 seconds after clicking the "Add" button
 //
-//		// Check that the signature check modal pops up
-//		wait.until(ExpectedConditions.visibilityOfElementLocated(By
-//				.xpath("//div[@class='modal-mask']//div[@class='modal-mask']//div[@class='form-section-container']")));
+//		WebElement pwd = driver.findElement(By.xpath("//input[@placeholder='Password']"));
 //
-//		// Find the input field with the specified placeholder
-//		WebElement usernameInput1 = wait
-//				.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//input[@placeholder='Username']")));
+//		pwd.sendKeys("1111");
 //
-//		usernameInput1.click();
-//
-//		// Clear the text from the input field
-//		usernameInput1.clear();
-//
-//		// Writing text into the input field
-//
-//		WebElement usernameInput11 = wait
-//				.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//input[@placeholder='Username']")));
-//		usernameInput11.sendKeys("valeshan.naidoo@strongroom.ai");
-//
-//		// Clicking on the input field
-//		WebElement passwordInput1 = wait
-//				.until(ExpectedConditions.elementToBeClickable(By.xpath("//input[@placeholder='PIN/Password']")));
-//		passwordInput1.click();
-//
-//		// Writing text into the input field
-//		passwordInput1.sendKeys("1111");
-//
-//		// Clicking on the field
-//		WebElement greenButton = wait
-//				.until(ExpectedConditions.elementToBeClickable(By.xpath("//div[@class='green-button']")));
-//		greenButton.click();
-//
-//		// Wait for 5 seconds (5000 milliseconds)
 //		Thread.sleep(2000);
 //
-//	}
+//		WebElement signinbtn = driver.findElement(By.xpath("//div[@class='green-button']"));
+//		signinbtn.click();
+//
+//		Thread.sleep(2000);
+//
+//		WebElement completebtn = driver.findElement(By.xpath("//h3[normalize-space()='Complete']"));
+//		completebtn.click();
+//
+//		Thread.sleep(2000);
+//
+//		
+//
+//		Thread.sleep(2000);
+}
+
+	//}
 //
 //private static void  List<String> Object  java.lang.Object locationFromExcel(String string)
 

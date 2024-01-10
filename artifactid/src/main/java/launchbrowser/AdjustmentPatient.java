@@ -80,71 +80,7 @@ public class AdjustmentPatient {
 
 		Thread.sleep(2000);
 
-//Process of balance check and copy the transaction ID from Drug register  on the stocktake screen		
 
-		WebElement stockbtn = wait
-				.until(ExpectedConditions.elementToBeClickable(By.xpath("//p[normalize-space()='Stock']")));
-		stockbtn.click();
-
-		extent.createTest("Click on the stock button at the top of the menu").assignCategory("AdjustmentPATIENT")
-				.assignDevice("Chrome").log(Status.INFO, "Click on the stock button at the top of the menu");
-
-		Thread.sleep(2000);
-
-		WebElement stockTakebtn = wait
-				.until(ExpectedConditions.elementToBeClickable(By.xpath("//p[normalize-space()='Stocktake']")));
-		stockTakebtn.click();
-
-		extent.createTest("Click on the stocktake button of submenu of stock").assignCategory("AdjustmentPATIENT")
-				.assignDevice("Chrome").log(Status.INFO, "Click on the stocktake button of submenu of stock");
-
-		Thread.sleep(2000);
-
-		WebElement medicationfilter = wait
-				.until(ExpectedConditions.elementToBeClickable(By.xpath("//input[@placeholder='Medication...']")));
-		medicationfilter.click();
-		medicationfilter.sendKeys("naproxen sodium 220 mg tablet");
-
-		WebElement clickonpatientFilter = wait
-				.until(ExpectedConditions.elementToBeClickable(By.xpath("//input[@placeholder='Patient...']")));
-		clickonpatientFilter.click();
-		clickonpatientFilter.sendKeys("kammo");
-		Thread.sleep(2000);
-
-		WebElement Displaystockbtn = wait.until(
-				ExpectedConditions.elementToBeClickable(By.xpath("//p[normalize-space()='Display In Stock Only']")));
-		Displaystockbtn.click();
-		Thread.sleep(2000);
-
-		WebElement Includes8 = wait
-				.until(ExpectedConditions.elementToBeClickable(By.xpath("//p[normalize-space()='Include S8']")));
-		Includes8.click();
-		Thread.sleep(2000);
-
-		extent.createTest("Click on the patient filter to search the particular patient ")
-				.assignCategory("AdjustmentPATIENT").assignDevice("Chrome")
-				.log(Status.INFO, "Click on the patient filter to search the particular patient");
-
-		Thread.sleep(2000);
-
-		WebElement ClickonSEARCHbtn = wait
-				.until(ExpectedConditions.elementToBeClickable(By.xpath("//button[@class='button submit-button']")));
-		ClickonSEARCHbtn.click();
-
-		Thread.sleep(2000);
-
-		WebElement clickonenterCOUNT = wait
-				.until(ExpectedConditions.elementToBeClickable(By.xpath("//input[@placeholder='Enter count']")));
-		clickonenterCOUNT.click();
-		clickonenterCOUNT.sendKeys("900");
-
-		extent.createTest("Click on the Enter count input field and enter the amount ")
-				.assignCategory("AdjustmentPATIENT").assignDevice("Chrome")
-				.log(Status.INFO, "Click on the Enter count input field and enter the amount");
-
-		Thread.sleep(2000);
-		
-		
 //Print the Balance check qty	
 		
 		WebElement AvailableBalance = driver
