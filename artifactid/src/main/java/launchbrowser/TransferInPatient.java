@@ -2,7 +2,6 @@ package launchbrowser;
 
 import java.time.Duration;
 
-
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
@@ -23,14 +22,30 @@ import org.openqa.selenium.WebDriver.Timeouts;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.NoSuchWindowException;
 
-public class TransferInPatient {
+import com.opencsv.CSVReader;
+import com.opencsv.exceptions.CsvException;
 
-	public static void main(String[] args) throws InterruptedException {
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.List;
+
+public class TransferInPATIENT {
+	
+	static WebDriver driver = new ChromeDriver();
+	static ExtentReports extent = new ExtentReports();
+	static ExtentSparkReporter spark = new ExtentSparkReporter("TransferINimprest.html");
+
+	public static void main(String[] args) throws InterruptedException, CsvException {
 		// TODO Auto-generated method stub
-
-		ExtentReports extent = new ExtentReports();
-		ExtentSparkReporter spark = new ExtentSparkReporter("TransferinPatient.html");
+		
 		extent.attachReporter(spark);
+
+		//driver.manage().window().maximize();
+		
+		// Path to your CSV file
+        String csvFilePath = "/home/user/Documents.csv";
+        
+       
 
 //Log In Process
 
@@ -90,6 +105,60 @@ public class TransferInPatient {
 		Thread.sleep(2000);
 
 // Print the Present available balance of that Medicaiton on the Stocktake 
+		
+		
+		try (CSVReader csvReader = new CSVReader(new FileReader("/home/user/Documents.csv"))) {
+			List<String[]> rows = csvReader.readAll();
+			int count = 0;
+			for (String[] row : rows) {
+				if (count == 0) {
+					count++;
+					continue;
+				}
+				if (row.length > 0) {
+					String medicationName = row[0].trim(); // Assuming medication name is in the first column
+					String location = row[1].trim();
+					String ImprestOnly = row[2].trim();
+					String patientName = row[3].trim();
+					String quantity = row[4].trim();
+					String process = row[5].trim();
+					System.out.println(medicationName);
+					System.out.println(location);
+					//System.out.println(patientName);
+					System.out.println(quantity);
+					System.out.println(process);
+					//quit();
+					
+					stocktake(medicationName, location, patientName, quantity, process);
+
+				}
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+	
+
+		extent.flush();
+
+		// driver.quit();
+
+	}
+
+	private static void quit() {
+		// TODO Auto-generated method stub
+
+	}
+
+	public static void stocktake(String medicationName, String location, String patientName, String quantity,
+			String process) throws InterruptedException, CsvException {
+		driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(1));
+
+		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5000));
+
+
+		
+		
 
 		WebElement Stock = wait
 				.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//p[normalize-space()='Stock']")));
@@ -137,7 +206,7 @@ public class TransferInPatient {
 
 //Print the Available Balance 		
 		WebElement AvailableBalance = driver
-				.findElement(By.xpath("/html[1]/body[1]/div[1]/div[1]/div[3]/div[2]/div[1]/div[2]/table[1]/tbody[1]/tr[1]/td[4]"));
+				.findElement(By.xpath("/html/body/div/div/div[3]/div[2]/div/div[2]/table/tr[2]/td[4]"));
 
 		extent.createTest("Check the Available Balance for this medication ").assignCategory("TransferINpatient ")
 				.assignDevice("Chrome").log(Status.INFO, "Check the Available Balance for this medication");
@@ -387,7 +456,7 @@ public class TransferInPatient {
 
 //Print 		
 		WebElement AddedBalance1 = wait.until(ExpectedConditions.presenceOfElementLocated(
-				By.xpath("/html[1]/body[1]/div[1]/div[1]/div[3]/div[2]/div[1]/div[2]/table[1]/tbody[1]/tr[1]/td[4]")));
+				By.xpath("/html[1]/body[1]/div[1]/div[1]/div[3]/div[2]/div[1]/div[2]/table[1]/tr[2]/td[4]")));
 
 		String stringByConcatenation = sum + "";
 
