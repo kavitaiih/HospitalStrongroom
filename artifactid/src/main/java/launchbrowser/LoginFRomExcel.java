@@ -26,7 +26,7 @@ import java.io.IOException;
 public class LoginFRomExcel {
 
     public static void main(String[] args) throws InterruptedException {
-        String excelFilePath = "/home/user/Documents/artifactid/files/LoginCred.xlsx";
+        String excelFilePath = "/home/user/git/repository/artifactid/files/LoginCred.xlsx";
         String sheetName = "Credentials";
 
         try {

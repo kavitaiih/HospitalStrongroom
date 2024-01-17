@@ -2,6 +2,7 @@ package launchbrowser;
 
 import java.time.Duration;
 
+
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
@@ -149,7 +150,7 @@ public class TransferInimprest {
 				Thread.sleep(2000);
 				
 				
-//Transfer In Process with Patient selection
+//Transfer In Process with imprest selection
 
 				WebElement transferin = wait
 						.until(ExpectedConditions.elementToBeClickable(By.xpath("//button[normalize-space()='Transfer In']")));
