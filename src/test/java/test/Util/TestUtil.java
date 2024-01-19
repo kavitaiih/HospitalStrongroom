@@ -226,4 +226,125 @@ public static Xls_Reader reader;
             return false;
         }
     }
+	
+	
+	public static ArrayList<Object[]> OtgoingImprest(){
+		ArrayList<Object[]> myData = new  ArrayList<Object[]>();
+		 try {
+			 reader = new Xls_Reader("C:/Users/bhako/Downloads/file.xlsx");
+		 }catch(Exception e) {
+			 e.printStackTrace();
+		 }
+		 
+		 for(int rownum=2; rownum<= reader.getRowCount("Outgoing imprest"); rownum++) {
+			 String Medication_name = reader.getCellData("Outgoing imprest", "Medication name", rownum);
+			 String note = reader.getCellData("Outgoing imprest", "Note", rownum);
+			 String quantity = reader.getCellData("Outgoing imprest", "Quantity", rownum);
+			 String pin = reader.getCellData("Outgoing imprest", "PIN", rownum);
+			 Object ab[]= {Medication_name, note, quantity, pin};
+			 myData.add(ab);
+			 
+			 
+		 }
+		 return myData;
+	}
+	
+	
+	public static boolean writeDataOtgoingImprest(int rownum, String Stock, String modifiedString1, String Status) {
+        try {
+            // Assuming the Excel file path is the same as the one used for reading
+            reader = new Xls_Reader("C:/Users/bhako/Downloads/file.xlsx");
+
+            // Update Quantity, Current Stock, and Total Balance in the Excel file
+            reader.setCellData("Outgoing imprest", "Current Stock", rownum, Stock);
+            reader.setCellData("Outgoing imprest", "Remaining Balance", rownum, modifiedString1);
+           reader.setCellData("Outgoing imprest", "Status", rownum, Status);
+
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+	
+	
+	public static ArrayList<Object[]> outgoingpatient(){
+		ArrayList<Object[]> myData = new  ArrayList<Object[]>();
+		 try {
+			 reader = new Xls_Reader("C:/Users/bhako/Downloads/file.xlsx");
+		 }catch(Exception e) {
+			 e.printStackTrace();
+		 }
+		 
+		 for(int rownum=2; rownum<= reader.getRowCount("Outgoing Patient"); rownum++) {
+			 String Medication_name = reader.getCellData("Outgoing Patient", "Medication name", rownum);
+			 String Patient_Name = reader.getCellData("Outgoing Patient", "Patient Name", rownum);
+			 String note = reader.getCellData("Outgoing Patient", "Note", rownum);
+			 String quantity = reader.getCellData("Outgoing Patient", "Quantity", rownum);
+			 String pin = reader.getCellData("Outgoing Patient", "PIN", rownum);
+			 Object ab[]= {Medication_name, Patient_Name, note, quantity, pin};
+			 myData.add(ab);
+			 
+			 
+		 }
+		 return myData;
+	}
+	
+
+	public static boolean writeDataoutgoingpatient(int rownum, String Stock, String modifiedString1, String Status) {
+        try {
+            // Assuming the Excel file path is the same as the one used for reading
+            reader = new Xls_Reader("C:/Users/bhako/Downloads/file.xlsx");
+
+            // Update Quantity, Current Stock, and Total Balance in the Excel file
+            reader.setCellData("Outgoing Patient", "Current Stock", rownum, Stock);
+            reader.setCellData("Outgoing Patient", "Remaining Balance", rownum, modifiedString1);
+           reader.setCellData("Outgoing Patient", "Status", rownum, Status);
+
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+	
+	
+	public static ArrayList<Object[]> destruction(){
+		ArrayList<Object[]> myData = new  ArrayList<Object[]>();
+		 try {
+			 reader = new Xls_Reader("C:/Users/bhako/Downloads/file.xlsx");
+		 }catch(Exception e) {
+			 e.printStackTrace();
+		 }
+		 
+		 for(int rownum=2; rownum<= reader.getRowCount("New Destruction Imprest"); rownum++) {
+			 String Medication_name = reader.getCellData("New Destruction Imprest", "Medication name", rownum);
+			 String note = reader.getCellData("New Destruction Imprest", "Note", rownum);
+			 String quantity = reader.getCellData("New Destruction Imprest", "Quantity", rownum);
+			 String pin = reader.getCellData("New Destruction Imprest", "PIN", rownum);
+			 Object ab[]= {Medication_name, note, quantity, pin};
+			 myData.add(ab);
+			 
+			 
+		 }
+		 return myData;
+	}
+	
+	
+	public static boolean writeDatadestruction(int rownum, String Stock, String modifiedString1, String Status) {
+        try {
+            // Assuming the Excel file path is the same as the one used for reading
+            reader = new Xls_Reader("C:/Users/bhako/Downloads/file.xlsx");
+
+            // Update Quantity, Current Stock, and Total Balance in the Excel file
+            reader.setCellData("New Destruction Imprest", "Current Stock", rownum, Stock);
+            reader.setCellData("New Destruction Imprest", "Remaining Balance", rownum, modifiedString1);
+           reader.setCellData("New Destruction Imprest", "Status", rownum, Status);
+
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 }

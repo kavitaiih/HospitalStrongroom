@@ -1,62 +1,71 @@
 package Testcase;
 
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Iterator;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+
+import test.Util.TestUtil;
 
 
 public class NewDestructionImprest extends Base {
 
-	@Test
-	public void destruction() throws InterruptedException {
+	
+	private static int rownum = 2;
+	@DataProvider
+	public Iterator<Object[]> getTestData() {
+		ArrayList<Object[]> testData =TestUtil.destruction();
+		return testData.iterator();
+		
+	}
+
+	@Test(dataProvider="getTestData")
+	public void destruction(String Medication_name, String note, String quantity, String pin ) throws InterruptedException {
 		
 		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5000));
 	
-		WebElement Stock = wait
-				.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//p[normalize-space()='Stock']")));
-		Stock.click();
+		driver.findElement(By.xpath("//p[normalize-space()='Stock']")).click();
 		Thread.sleep(2000);
 
-		WebElement StockTake = wait
-				.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//p[normalize-space()='Stocktake']")));
-		StockTake.click();
-		Thread.sleep(2000);
-		WebElement medicationfilter = wait
-				.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//input[@placeholder='Medication...']")));
-		medicationfilter.click();
-		medicationfilter.sendKeys("Repreve 2 mg tablet");
+		driver.findElement(By.xpath("//p[normalize-space()='Stocktake']")).click();
 		Thread.sleep(2000);
 
-		WebElement ImprestOnly = wait.until(
-				ExpectedConditions.presenceOfElementLocated(By.xpath("//p[normalize-space()='Display Imprest Only']")));
+		// New code to read medication name from Excel
+		driver.findElement(By.xpath("//input[@placeholder='Medication...']")).sendKeys(Medication_name);
+		System.out.println(Medication_name);
+		Thread.sleep(2000);
+
+		WebElement ImprestOnly = driver.findElement(By.xpath("//p[normalize-space()='Display Imprest Only']"));
 		ImprestOnly.click();
 		Thread.sleep(1000);
 
-		WebElement clickonDisplyStock = wait.until(ExpectedConditions
-				.presenceOfElementLocated(By.xpath("//p[normalize-space()='Display In Stock Only']")));
+		WebElement clickonDisplyStock = driver.findElement(By.xpath("//p[normalize-space()='Display In Stock Only']"));
 		clickonDisplyStock.click();
 		Thread.sleep(1000);
 
-		WebElement clickonIncluseS8 = wait
-				.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//p[normalize-space()='Include S8']")));
+		WebElement clickonIncluseS8 = driver.findElement(By.xpath("//p[normalize-space()='Include S8']"));
 		clickonIncluseS8.click();
 		Thread.sleep(1000);
 
-		WebElement SearchBTN = wait.until(
-				ExpectedConditions.presenceOfElementLocated(By.xpath("//button[@class='button submit-button']")));
+
+		WebElement SearchBTN = driver.findElement(By.xpath("//button[@class='button submit-button']"));
 		SearchBTN.click();
 		Thread.sleep(2000);
 
 		//Print the Available Balance 
 
-		WebElement AvailableBalance = driver
-				.findElement(By.xpath("/html[1]/body[1]/div[1]/div[1]/div[3]/div[2]/div[1]/div[2]/table[1]/tbody[1]/tr[1]/td[4]"));
-
+		WebElement SelectedMedication = driver.findElement(By.xpath("//td[1]"));
+		String MedicationName1 = SelectedMedication.getText();
+		System.out.println("Medication Name = " + MedicationName1);
+		Thread.sleep(2000);
+		
 		// Get the text content of the element and print it
-
+		WebElement AvailableBalance = driver.findElement(By.xpath("//td[4]"));
 		String stock = AvailableBalance.getText();
 		String textToRemove = "tablet(s)";
 		String modifiedString = stock.replace(textToRemove, "");
@@ -75,7 +84,7 @@ public class NewDestructionImprest extends Base {
 		
 		WebElement notes = wait
 				.until(ExpectedConditions.elementToBeClickable(By.xpath("//textarea[@id='note-modal']")));
-		notes.sendKeys("Notes Will be here");
+		notes.sendKeys(note);
 		Thread.sleep(2000);
 
 		WebElement ImprestBTN = wait.until(ExpectedConditions
@@ -86,16 +95,17 @@ public class NewDestructionImprest extends Base {
 		WebElement ClickONmedicationINPUT = wait.until(
 				ExpectedConditions.elementToBeClickable(By.xpath("//input[@placeholder='Type medication name here']")));
 		ClickONmedicationINPUT.click();
-		ClickONmedicationINPUT.sendKeys("Repreve 2 mg tablet");
+		ClickONmedicationINPUT.sendKeys(Medication_name);
 
 		WebElement SelectMedication = wait.until(
-				ExpectedConditions.elementToBeClickable(By.xpath("//p[normalize-space()='Repreve 2 mg tablet']")));
+				ExpectedConditions.elementToBeClickable(By.xpath("/html/body/div[2]/div/ul/li/div")));
 		SelectMedication.click();
 		Thread.sleep(2000);
+		
 
 		WebElement qty = wait
 				.until(ExpectedConditions.elementToBeClickable(By.xpath("//input[@placeholder='Enter qty']")));
-		qty.sendKeys("1");
+		qty.sendKeys(quantity);
 		Thread.sleep(2000);
 
 		WebElement addclicked = wait
@@ -105,8 +115,7 @@ public class NewDestructionImprest extends Base {
 
 		//Print the entered qty
 
-		WebElement AddedBalance = wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(
-				"/html[1]/body[1]/div[1]/div[1]/div[3]/div[1]/div[1]/div[2]/div[1]/div[1]/div[2]/form[1]/div[1]/div[2]/div[2]/table[1]/tr[1]/td[2]/p[1]")));
+		WebElement AddedBalance = wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("/html[1]/body[1]/div[1]/div[1]/div[3]/div[1]/div[1]/div[2]/div[1]/div[1]/div[2]/form[1]/div[1]/div[2]/div[2]/table[1]/tr[1]/td[2]/p[1]")));
 		String Add = AddedBalance.getText();
 		// Check if the string is not empty
 		if (!Add.isEmpty()) {
@@ -155,7 +164,7 @@ public class NewDestructionImprest extends Base {
 
 		// Compare the values
 
-		WebElement AddedBalance1 = wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("/html[1]/body[1]/div[1]/div[1]/div[3]/div[2]/div[1]/div[2]/table[1]/tbody[1]/tr[1]/td[4]")));
+		WebElement AddedBalance1 = wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//td[4]")));
 		int firstCharacter = Character.getNumericValue(Add.charAt(0));
 
 		// Print the first character
@@ -181,33 +190,23 @@ public class NewDestructionImprest extends Base {
 		
 		//Go to the destruction tab and check the entry of that particular medication
 		
-		WebElement Destructionbtn = wait
-				.until(ExpectedConditions.elementToBeClickable(By.xpath("//p[normalize-space()='Destructions']")));
-		Destructionbtn.click();
+		driver.findElement(By.xpath("//p[normalize-space()='Destructions']")).click();
 		Thread.sleep(2000);
 		
-		WebElement Medicationfilter = wait
-				.until(ExpectedConditions.elementToBeClickable(By.xpath("//input[@placeholder='Medication...']")));
-		Medicationfilter.click();
-		Medicationfilter.sendKeys("Repreve 2 mg tablet");
-		
+		driver.findElement(By.xpath("//input[@placeholder='Medication...']")).sendKeys(Medication_name);
 		Thread.sleep(2000);
 		
-		WebElement DestructionRegisterBTN = wait
-				.until(ExpectedConditions.elementToBeClickable(By.xpath("//p[@class='select-filter-item']")));
-		DestructionRegisterBTN.click();
-		
+		driver.findElement(By.xpath("//p[@class='select-filter-item']")).click();
 		Thread.sleep(2000);
 		
-		WebElement checkthenewentry = wait
-				.until(ExpectedConditions.elementToBeClickable(By.xpath("//i[@class='pi pi-angle-right']")));
-		checkthenewentry.click();
-
+		driver.findElement(By.xpath("//i[@class='pi pi-angle-right']")).click();
 		Thread.sleep(2000);
 		
-		System.out.println("Verify the destruction entery in the Destructions tab");
-		
-		Thread.sleep(2000);
+		if (modifiedString1.contentEquals(stringByConcatenation)) {
+			TestUtil.writeDatadestruction(rownum++, stock, modifiedString1, "Pass");
+		}else {
+			TestUtil.writeDatadestruction(rownum++, stock, modifiedString1, "Fail");
+		}
 	}
 }
  
