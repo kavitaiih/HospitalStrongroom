@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-
 import org.apache.commons.io.FileUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.OutputType;
@@ -64,7 +63,6 @@ public class Base extends createTask implements ITestListener {
     	
     	driver.findElement(By.xpath("//input[@placeholder='Password']")).clear();
     	driver.findElement(By.xpath("//input[@placeholder='Password']")).sendKeys("stew-dazzling-washtub!");
-    	
     	driver.findElement(By.xpath("//p[@class='blue-button']")).click();
     	
     	
@@ -75,13 +73,11 @@ public class Base extends createTask implements ITestListener {
 		WebElement dropdown1 = wait
 				.until(ExpectedConditions.elementToBeClickable(By.xpath("//li[contains(@aria-label,'Pharmacy')]")));
 		dropdown1.click();
-
 		Thread.sleep(2000);
 
 		WebElement selectlocationbtn = wait
 				.until(ExpectedConditions.elementToBeClickable(By.xpath("//p[@class='blue-button']")));
 		selectlocationbtn.click();
-
 		Thread.sleep(2000);
 
     } 
