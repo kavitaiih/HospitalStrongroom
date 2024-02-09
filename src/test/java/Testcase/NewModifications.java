@@ -3,9 +3,9 @@ package Testcase;
 import java.time.Duration;
 
 import java.util.ArrayList;
-
 import java.util.Iterator;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -16,23 +16,24 @@ import org.testng.asserts.SoftAssert;
 
 import test.Util.TestUtil;
 
-public class TrnasferOutpatient extends Base {
+public class NewModifications extends Base {
+
 	private static int rownum = 2;
 
 	@DataProvider
 	public Iterator<Object[]> getTestData() {
-		ArrayList<Object[]> testData = TestUtil.TRnasferoutPATIENT();
+		ArrayList<Object[]> testData = TestUtil.dipensing();
 		return testData.iterator();
 	}
 
 	@Test(dataProvider = "getTestData")
-	public void transferoutpatient(String Medication_name, String Patient_Name, String Prescriber_Name, String Quantity,
-			String Current_Stock, String Remaining_Balance, String pin, String note, String location, String Status)
-			throws InterruptedException {
+	public void Dispensingmedication(String Medication_name, String Patient_Name, String note, String Prescriber_Name,
+			String Quantity, String PIN) throws InterruptedException {
+		
 		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5000));
 		SoftAssert softAssert = new SoftAssert();
 
-		// Print the Present available balance of that Medicaiton on the Stocktake
+		// Check the stock on the medidcation
 
 		driver.findElement(By.xpath("//p[normalize-space()='Stock']")).click();
 		Thread.sleep(2000);
@@ -41,9 +42,8 @@ public class TrnasferOutpatient extends Base {
 		Thread.sleep(2000);
 
 		// New code to read medication name from Excel
-		// New code to check if Medication_name is null or empty
 		if (Medication_name == null || Medication_name.isEmpty()) {
-			System.out.println("Medication_name is null or empty. Exiting the test.");
+			System.out.println("No more data to process. Exiting the test.");
 			return;
 		}
 
@@ -57,8 +57,14 @@ public class TrnasferOutpatient extends Base {
 			return; // Exit the test method
 		}
 
+		Thread.sleep(2000);
+
+		driver.findElement(By.xpath("//input[@placeholder='Patient...']")).click();
+		Thread.sleep(2000);
+
 		driver.findElement(By.xpath("//input[@placeholder='Patient...']")).sendKeys(Patient_Name); // Patient name from
-																									// Excel
+																									// excel
+
 		Thread.sleep(1000);
 
 		driver.findElement(By.xpath("//p[normalize-space()='Display In Stock Only']")).click();
@@ -81,17 +87,17 @@ public class TrnasferOutpatient extends Base {
 			MedicationName1 = SelectedMedication.getText();
 			System.out.println("Medication Name = " + MedicationName1);
 		} catch (Exception e) {
-			System.out.println("Entry for this medication is not found");
-			// System.out.println("Medication Name Not found: 0");
-
+			//System.out.println("Medication Name Not found: 0");
+			System.out.println("Entry for this medication for selected patient  is not found");
+			
 			// Set default values for MedicationName1, stock, and RemainingasString
 			MedicationName1 = "-";
 			stock = "-";
 			String RemainingasString = "-";
 
 			// Write default values to Excel or perform any necessary action
-			TestUtil.writeDataTRnasferoutPATIENT(rownum++, stock, RemainingasString, "Fail");
-			// return; // This will exit the current method, allowing the program to
+			TestUtil.writeDatadipensing(rownum++, stock, RemainingasString, "Fail");
+			// This will exit the current method, allowing the program to continue
 
 		}
 
@@ -105,10 +111,9 @@ public class TrnasferOutpatient extends Base {
 
 			if (intValue == 0) {
 				Thread.sleep(2000);
-				inputdata = "\n" + "Transfer out Location: " + location + "\n" + "Medication Name: " + Medication_name
+				inputdata = "Medication Name: " + Medication_name
 						+ "\n" + "Patient Name: " + Patient_Name + "\n" + "Medication QTY is found: Zero " + stock
-						+ "\n";
-				;
+						+ "\n";	;
 
 				softAssert.assertEquals("0", stock,
 						"Initial Stock is 0, that's why the process of transfer out is not possible");
@@ -129,76 +134,62 @@ public class TrnasferOutpatient extends Base {
 		}
 		Thread.sleep(2000);
 
-		try {
-			WebElement SelectedPatient = driver.findElement(By.xpath("//td[2]"));
-			PatientName1 = SelectedPatient.getText();
-			System.out.println("Patient Name = " + PatientName1);
-		} catch (Exception e) {
-			// System.out.println("Patient Name not found: 0");
-			PatientName1 = "-"; // Set default value for PatientName1 if not found
-		}
+			try {
+				WebElement SelectedPatient = driver.findElement(By.xpath("//td[2]"));
+				PatientName1 = SelectedPatient.getText();
+				System.out.println("Patient Name = " + PatientName1);
+			} catch (Exception e) {
+				// System.out.println("Patient Name not found: 0");
+				PatientName1 = "-"; // Set default value for PatientName1 if not found
+			}
 
-		Thread.sleep(2000);
-		// Transfer out Process
+//Start Dispensing process	
 
-		driver.findElement(By.xpath("//button[normalize-space()='Transfer Out']")).click();
-		Thread.sleep(2000);
-
-		driver.findElement(By.xpath("//input[@placeholder='Type in location to send to']")).sendKeys("Emergency Ward");
-
-		driver.findElement(By.xpath("//span[@class='p-dropdown-trigger-icon pi pi-chevron-down']")).click();
+		driver.findElement(By.xpath("//button[normalize-space()='Dispensing']")).click();
 		Thread.sleep(2000);
 
-		driver.findElement(By.xpath("//li[@aria-label='Emergency Ward']")).click();
+		driver.findElement(By.xpath("//input[@id='refnum']")).sendKeys("12345");
+		Thread.sleep(2000);
 
-		driver.findElement(By.xpath("//textarea[@id='note-modal']")).sendKeys("Notes Will be here");
+		driver.findElement(By.xpath("//textarea[@id='note-modal']")).sendKeys(note); // Take not from excel
+		Thread.sleep(2000);
 
-		driver.findElement(By.xpath("//p[normalize-space()='Patient Medication']")).click();
+		driver.findElement(By.xpath("//p[@class='pom-imprest-choice-button']")).click();
+		Thread.sleep(2000);
 
 		driver.findElement(By.xpath("//input[@placeholder='Enter Patient name or Medicare Number']"))
-				.sendKeys(Patient_Name);
+				.sendKeys(Patient_Name); // Patient name from Excel
 		Thread.sleep(2000);
 
-		driver.findElement(By.xpath("//p[normalize-space()='Search']")).click();
+		driver.findElement(By.xpath("//p[normalize-space()='Search']")).click(); // click on search btn
 		Thread.sleep(2000);
 
-		driver.findElement(By.xpath("//div[@class='patient-result-info']")).click();
+		WebElement ClickonPatient = driver.findElement(By.xpath("//div[@class='patient-result-info']"));
+		ClickonPatient.click();
 		Thread.sleep(2000);
 
-		driver.findElement(By.xpath("//input[@placeholder='Enter Prescriber No. or Name']")).sendKeys(Prescriber_Name);
+		driver.findElement(By.xpath("//input[@placeholder='Enter Prescriber No. or Name']")).sendKeys(Prescriber_Name); // Prescriber
+																																																											// Excel
 		Thread.sleep(2000);
+		
+		driver.findElement(By.xpath("/html[1]/body[1]/div[1]/div[1]/div[3]/div[1]/div[1]/div[2]/div[1]/div[1]/div[2]/form[1]/div[1]/div[2]/div[2]/div[1]/div[1]/div[1]/p[1]")).click(); // Prescriber
+		
+        Thread.sleep(2000);
 
-		driver.findElement(By.xpath(
-				"/html[1]/body[1]/div[1]/div[1]/div[3]/div[1]/div[1]/div[2]/div[1]/div[1]/div[2]/form[1]/div[1]/div[2]/div[2]/div[1]/div[1]/div[1]/p[3]"))
-				.click();
-		Thread.sleep(2000);
-
-		WebElement Prescriber = driver.findElement(By.xpath(
-				"/html[1]/body[1]/div[1]/div[1]/div[3]/div[1]/div[1]/div[2]/div[1]/div[1]/div[2]/form[1]/div[1]/div[2]/div[2]/div[1]/div[1]/p[1]"));
-		String PrisName = Prescriber.getText();
-		System.out.println(PrisName);
-		Thread.sleep(1000);
-
-		WebElement clickmedication = driver
-				.findElement(By.xpath("//span[@class='p-dropdown-label p-inputtext p-placeholder']"));
-		clickmedication.click();
-
-		WebElement ClickONmedicationINPUT = wait.until(
-				ExpectedConditions.elementToBeClickable(By.xpath("/html[1]/body[1]/div[2]/div[1]/div[1]/input[1]")));
+				WebElement ClickONmedicationINPUT = wait.until(
+				ExpectedConditions.elementToBeClickable(By.xpath("//input[@placeholder='Type medication name here']")));
 		ClickONmedicationINPUT.sendKeys(Medication_name);
 		Thread.sleep(5000);
 
-		WebElement nomedicationnamefound = driver.findElement(By.xpath("/html[1]/body[1]/div[2]/div[2]/ul[1]/li[1]")); // NO
+		WebElement nomedicationnamefound = driver.findElement(By.xpath("/html[1]/body[1]/div[2]/div[1]/ul[1]/li[1]")); // NO medication found
 		Thread.sleep(5000);
-		// MEDICATION
-		// FOUND
 		String NoMedication = nomedicationnamefound.getText();
 
-		if ("No results found".equals(NoMedication)) {
+		if ("No available options".equals(NoMedication)) {
 			System.out.println("Medication not selected: " + NoMedication);
 			Thread.sleep(2000);
-			inputdata = "Transfer out Location: " + location + "\n" + "Medication Name: " + Medication_name + "\n"
-					+ "Patient Name" + Patient_Name + "\n"
+			inputdata = "Medication Name: " + Medication_name + "\n"
+					+ "Patient Name:  " + Patient_Name + "\n"
 					+ "Entry for this medication for selected patient is not found: " + NoMedication + "\n";
 			;
 
@@ -207,7 +198,7 @@ public class TrnasferOutpatient extends Base {
 			return;
 		} else {
 			// System.out.println("Medication selected: " + Medication_name);
-			WebElement clickonmedication = driver.findElement(By.xpath("/html[1]/body[1]/div[2]/div[2]/ul[1]")); // SELECT
+			WebElement clickonmedication = driver.findElement(By.xpath("/html[1]/body[1]/div[2]/div[1]/ul[1]/li[1]/div[1]/div[1]/div[1]/p[1]")); // SELECT
 			String Test = clickonmedication.getText();
 			// System.out.println(Test);// MEDICATION
 			Thread.sleep(2000);
@@ -216,16 +207,15 @@ public class TrnasferOutpatient extends Base {
 		}
 		Thread.sleep(2000);
 
-		WebElement quantityInput = driver.findElement(By.xpath("//input[@placeholder='Quantity']"));
-		quantityInput.click();
-		quantityInput.clear();
-		quantityInput.sendKeys(Quantity);
+
+		driver.findElement(By.xpath("//input[@placeholder='Enter quantity']")).sendKeys(Quantity); // qty from excel fle
+
 		Thread.sleep(2000);
 
-		driver.findElement(By.xpath("//p[@class='blue-button']")).click();
+		driver.findElement(By.xpath("//p[@class='submit-button blue-button']")).click(); //
 		Thread.sleep(2000);
 
-		// Print the entered qty
+//Print Entered qty		
 
 		WebElement AddedBalance = driver
 				.findElement(By.xpath("//div[@class='right-form-section-drug-container']//span[1]"));
@@ -242,44 +232,44 @@ public class TrnasferOutpatient extends Base {
 		String RemainingasString = String.valueOf(Remaining);
 		System.out.println("Remaining Balance = " + Remaining);
 		Thread.sleep(2000);
-		// Continue the process of transfer in
 
-		driver.findElement(By.xpath("//p[normalize-space()='Send Transfer']")).click();
+//Continue the despensing process		
+		driver.findElement(By.xpath("//p[normalize-space()='Dispense']")).click();
 		Thread.sleep(2000);
 
-		driver.findElement(By.xpath("//input[@placeholder='Password']")).sendKeys("1111");
+		driver.findElement(By.xpath("//input[@placeholder='Password']")).sendKeys("1111"); // enter password from excel
 		Thread.sleep(2000);
 
-		driver.findElement(By.xpath("//div[@class='green-button']")).click();
+		driver.findElement(By.xpath("//div[@class='green-button']")).click(); // sign in btn
 		Thread.sleep(2000);
 
-		driver.findElement(By.xpath("//h3[normalize-space()='Complete']")).click();
-		Thread.sleep(2000);
-
-		WebElement againclickonsearchbtn = driver.findElement(By.xpath("//button[@class='button submit-button']"));
-		againclickonsearchbtn.click();
+		driver.findElement(By.xpath("//h3[normalize-space()='Complete']")).click(); // complete btn
 		Thread.sleep(3000);
 
-// Print the final stock
+		driver.findElement(By.xpath("//button[@class='button submit-button']")).click(); // Again search the same drug
+																							// on the stocktake screen
+
+		Thread.sleep(3000);
+
+//Print New Balance
 
 		WebElement AvailableBalance1 = driver.findElement(By.xpath("//td[4]"));
 		String stock2 = AvailableBalance1.getText();
 		String numericStock1 = stock2.replaceAll("[^0-9]", "");
-		System.out.println("Final Balance on the stocktake screen = " + numericStock1);
+		System.out.println("Final Balance on the stoctake screen = " + numericStock1);
 		System.out.println("---------------------------------------------------");
 
 		Thread.sleep(3000);
+		inputdata =  "Transferin Imprest Drug Name: "
+				+ Medication_name + "\n"+ "Patient Name:  " + Patient_Name + "\n" + "Transferin Imprest in quantity:  " + abc
+				+ "\n" + "Current Stock: " + stock + "\n" + "Final Stock: " + RemainingasString + "\n";;
 
-		inputdata = "\n" + "Transfer In Imprest Location: " + location + "\n" + "Transferin Imprest Drug Name: "
-				+ Medication_name + "\n" + "Patient Name:  " + Patient_Name + "\n" + "Transferin Imprest in quantity:  " + abc
-				+ "\n" + "Current Stock: " + stock + "\n" + "Final Stock: " + RemainingasString + "\n";
-		;
-
-//		if(RemainingasString.equals(numericStock1) ) {
-//			TestUtil.writeDataTRnasferoutPATIENT(rownum++, stock, RemainingasString, "Pass");	
-//		}else {
-//			TestUtil.writeDataTRnasferoutPATIENT(rownum++, stock, RemainingasString, "Fail");	
+//		if (RemainingasString.equals(numericStock1)) {
+//			TestUtil.writeDatadipensing(rownum++, stock, RemainingasString, "Pass");
+//		} else {
+//			TestUtil.writeDatadipensing(rownum++, stock, RemainingasString, "Fail");
+//			Thread.sleep(3000);
 //		}
-	}
 
+	}
 }

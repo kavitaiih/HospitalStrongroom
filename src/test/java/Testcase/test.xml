@@ -1,15 +1,18 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
 <suite name="FREE CRM Application Test Automation Test Suite">
+    <listeners>
+        <listener class-name="com.ExtentReportListener.ExtentReportListener" />
+    </listeners>
 
-	<listeners>
-		<listener class-name="com.ExtentReportListener.ExtentReportListener" />
-	</listeners>
+    <test name="Parth" logLevel="INFO">
+        <classes>
+            <class name="Testcase.TransferINImprest"/>
+            <class name="Testcase.TransferinPatient"/>
+            <class name="Testcase.TransferoutImprest"/>
+            <class name="Testcase.TransferoutPatient"/>
+            <class name="Testcase.NewDestructionImprest"/>
+        </classes>
+    </test>
 
-
-	<test name="Parth">
-		<classes>
-			<class name="Testcase.TransferinPatientExcel"></class>
-		</classes>
-	</test>
 </suite>
+

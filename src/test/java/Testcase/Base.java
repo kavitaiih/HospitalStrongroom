@@ -12,6 +12,7 @@ import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -29,6 +30,8 @@ import io.github.bonigarcia.wdm.WebDriverManager;
 
 public class Base extends createTask implements ITestListener {
     static WebDriver driver;
+    protected static String inputdata;
+    public String loginTaskDescription;  // Declare at the class level
 
     @BeforeSuite
     public void start() {
@@ -39,8 +42,8 @@ public class Base extends createTask implements ITestListener {
     @BeforeClass
     public void setUp() {
         // Set the path to your ChromeDriver executable
-        WebDriverManager.firefoxdriver().setup();
-        driver = new FirefoxDriver();
+        WebDriverManager.chromedriver().setup();
+        driver = new ChromeDriver();
 		driver.manage().window().maximize();
     } // this method launch the browser 
 
@@ -48,43 +51,73 @@ public class Base extends createTask implements ITestListener {
     
     @BeforeMethod
     public void URL() throws InterruptedException {
-    	driver.get("https://hospital-staging.strongroom.ai/login");
-		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5000));
-		
-    	WebElement locationInput = driver.findElement(By.xpath("//input[@placeholder='Location']"));
-    	locationInput.clear();
-		locationInput.sendKeys("Orange Hospital"); // Location from Excel
-		
-		WebElement locationOption = wait.until(ExpectedConditions.elementToBeClickable(
-				By.xpath("//p[@class='drug-search-result' and text()='" + "Orange Hospital" + "']")));
-		locationOption.click();
-		
-		driver.findElement(By.xpath("//input[@placeholder='Username/email']")).clear();
-    	driver.findElement(By.xpath("//input[@placeholder='Username/email']")).sendKeys("qa@strongroom.ai");
-    	
-    	driver.findElement(By.xpath("//input[@placeholder='Password']")).clear();
-    	driver.findElement(By.xpath("//input[@placeholder='Password']")).sendKeys("stew-dazzling-washtub!");
-    	
-    	driver.findElement(By.xpath("//p[@class='blue-button']")).click();
-    	
-    	
-    	WebElement dropdown = wait.until(ExpectedConditions
-				.elementToBeClickable(By.xpath("//span[@class='p-dropdown-trigger-icon pi pi-chevron-down']")));
-		dropdown.click();
+        driver.get("https://hospital-staging.strongroom.ai/login");
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5000));
 
-		WebElement dropdown1 = wait
-				.until(ExpectedConditions.elementToBeClickable(By.xpath("//li[contains(@aria-label,'Pharmacy')]")));
-		dropdown1.click();
+        WebElement locationInput = driver.findElement(By.xpath("//input[@placeholder='Location']"));
+        locationInput.clear();
+        locationInput.sendKeys("Orange Hospital"); // Location from Excel
+        Thread.sleep(2000);
 
-		Thread.sleep(2000);
 
-		WebElement selectlocationbtn = wait
-				.until(ExpectedConditions.elementToBeClickable(By.xpath("//p[@class='blue-button']")));
-		selectlocationbtn.click();
+        WebElement locationOption = wait.until(ExpectedConditions.elementToBeClickable(
+                By.xpath("//p[@class='drug-search-result' and text()='" + "Orange Hospital" + "']")));
+        locationOption.click();
+        Thread.sleep(2000);
 
-		Thread.sleep(2000);
 
+        WebElement usernameInput = driver.findElement(By.xpath("//input[@placeholder='Username/email']"));
+        usernameInput.clear();
+        usernameInput.sendKeys("qa@strongroom.ai");
+        Thread.sleep(2000);
+
+
+        WebElement passwordInput = driver.findElement(By.xpath("//input[@placeholder='Password']"));
+        passwordInput.clear();
+        passwordInput.sendKeys("stew-dazzling-washtub!");
+        Thread.sleep(2000);
+
+
+        String loginPageURL = driver.getCurrentUrl();
+        String enteredLocation = locationInput.getAttribute("value");
+        String  enteredUsername = usernameInput.getAttribute("value");
+        String enteredPassword = passwordInput.getAttribute("value");
+        String selectedLocation = "Pharmacy";
+        Thread.sleep(3000);
+        
+
+        WebElement loginButton = driver.findElement(By.xpath("//p[@class='blue-button']"));
+        loginButton.click();
+
+        WebElement dropdown = wait.until(ExpectedConditions
+                .elementToBeClickable(By.xpath("//span[@class='p-dropdown-trigger-icon pi pi-chevron-down']")));
+        dropdown.click();
+
+    
+        WebElement dropdown1 = wait
+                .until(ExpectedConditions.elementToBeClickable(By.xpath("//li[contains(@aria-label,'Pharmacy')]")));
+        dropdown1.click();
+
+        Thread.sleep(2000);
+
+        WebElement selectLocationBtn = wait
+                .until(ExpectedConditions.elementToBeClickable(By.xpath("//p[@class='blue-button']")));
+        selectLocationBtn.click();
+        Thread.sleep(2000);
+
+        // Capture login task description
+         // You might need to retrieve the actual selected location
+
+        loginTaskDescription = "Login Page URL: " + loginPageURL + "\n" +
+                "Entered Location: " + enteredLocation + "\n" +
+                "Entered Username: " + enteredUsername + "\n" +
+                "Entered Password: " + enteredPassword + "\n" +
+                "Selected Location: " + selectedLocation;
+        
+        
     } 
+    
+
 
     public void failed(String testMethodName) {
         File scrFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
@@ -99,18 +132,23 @@ public class Base extends createTask implements ITestListener {
 
     @AfterMethod
     public void tearDown(ITestResult result) throws IOException {
-    	String status = "to do";
+    	
     	String formattedDateTime = getCurrentDateTime();
-        if (result.getStatus() == ITestResult.FAILURE) {
-            String taskDescription = "This added by automation script";
-            String listId = "901600971152";  
+		if (result.getStatus() == ITestResult.FAILURE) {
+            String taskDescription = loginTaskDescription;
+            //String taskDescription = "This added by automation script";
+            String listId = "901601274942"; 
+        	String status = "Fail";
+
             //List id for Fail Task list
             createClickUpTask(formattedDateTime, taskDescription, listId, status); 
             // this method create one task with current date and time
             
             String methodName = result.getMethod().getMethodName();
             String consoleError = extractConsoleError(result);
-            createClickUpTask(methodName, consoleError, listId, status); 
+            //String loginTaskDescription1 = null;
+			String fails =  inputdata + "\n" + consoleError + "Status" + status;
+            createClickUpTask(methodName, fails, listId, status); 
             // This method create task which is failed test case
             
             String mainTaskId = getTaskId(formattedDateTime, listId);
@@ -118,15 +156,19 @@ public class Base extends createTask implements ITestListener {
             updateTask(subTaskId, mainTaskId);  
             // this method move the fail test case task into current date and time task and make it sub task
         } else {
-            String taskDescription = "This added by automation script";
-            String listId = "901600971153";
+            String taskDescription = loginTaskDescription;
+            String listId = "901601274938";
+        	String status = "Pass";
+
             //List id for Pass Task list
             createClickUpTask(formattedDateTime, taskDescription, listId, status);  
             // this method create one task with current date and time
             
             String methodName = result.getMethod().getMethodName();
             String consoleError = extractConsoleError(result);
-            createClickUpTask(methodName, consoleError, listId, status);  
+            
+			String fails = inputdata + "\n" + consoleError + "Status" + status;
+            createClickUpTask(methodName, fails, listId, status); 
             // This method create task which is pass test case
             
             String mainTaskId = getTaskId(formattedDateTime, listId);
@@ -140,7 +182,7 @@ public class Base extends createTask implements ITestListener {
 
     private String getCurrentDateTime() {
         LocalDateTime now = LocalDateTime.now();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
         return now.format(formatter);
     }
 

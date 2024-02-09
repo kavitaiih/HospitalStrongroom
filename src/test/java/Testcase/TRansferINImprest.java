@@ -1,6 +1,10 @@
 package Testcase;
 
 import java.util.ArrayList;
+import org.openqa.selenium.NoSuchElementException;
+import java.util.ArrayList;
+import java.util.Iterator;
+
 import java.util.Iterator;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
@@ -8,28 +12,45 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import test.Util.TestUtil;
 
-public class TRansferINImprest extends Base{
-	
+public class TRansferINImprest extends Base {
+
 	private static int rownum = 2;
 
 	@DataProvider
 	public Iterator<Object[]> getTestData() {
-		ArrayList<Object[]> testData =TestUtil.TRansferINImprest();
+		ArrayList<Object[]> testData = TestUtil.TRansferINImprest();
 		return testData.iterator();
-		
 	}
 
-	@Test(dataProvider="getTestData")
-	public void traansferInPrescriber(String Medication_name, String Quantity, String Current_Stock, String Total_Balance, String pin, String note, String location, String Status ) throws InterruptedException {
-		
+	@Test(dataProvider = "getTestData")
+	public void traansferInPrescriber(String Medication_name, String Quantity, String Current_Stock,
+			String Total_Balance, String pin, String note, String location, String Status) throws InterruptedException {
+
+		// Set the log level for PoolingHttpClientConnectionManager to a higher level
+		// (e.g., INFO or higher)
+
 		driver.findElement(By.xpath("//p[normalize-space()='Stock']")).click();
 		Thread.sleep(2000);
 
 		driver.findElement(By.xpath("//p[normalize-space()='Stocktake']")).click();
 		Thread.sleep(2000);
+		
+		// Check if Medication_name is empty, exit the loop
+        if (Medication_name == null || Medication_name.isEmpty()) {
+            System.out.println("No more data to process. Exiting the test.");
+            return;
+        }
 
 		// New code to read medication name from Excel
-		driver.findElement(By.xpath("//input[@placeholder='Medication...']")).sendKeys(Medication_name); // Medication name from Excel
+		try {
+            WebElement medicationInput = driver.findElement(By.xpath("//input[@placeholder='Medication...']"));
+            medicationInput.sendKeys(Medication_name);
+            Thread.sleep(2000); // Adjust the sleep time as needed
+        } catch (NoSuchElementException e) {
+            System.out.println("Medication input element not found. Exiting the test.");
+            return; // Exit the test method
+        }   
+			
 		Thread.sleep(2000);
 
 		driver.findElement(By.xpath("//p[normalize-space()='Display In Stock Only']")).click();
@@ -44,28 +65,33 @@ public class TRansferINImprest extends Base{
 		driver.findElement(By.xpath("//button[@class='button submit-button']")).click();
 		Thread.sleep(2000);
 
-		//Print the Available Balance and selected Medication
-		
-		WebElement SelectedMedication = driver.findElement(By.xpath("//td[1]"));
-				
-		
-		String MedicationName1 = SelectedMedication.getText();
-		System.out.println("Medication Name = " + MedicationName1);
+		// Print the Available Balance and selected Medication, and patient name
 
-		Thread.sleep(2000);
-		
+		String MedicationName1 = "0"; // Default value in case element not found
+		String stock = "0"; // Default value in case element not found
+		// String PatientName1 = "0"; //Default value in case element not found
 
-		WebElement AvailableBalance = driver.findElement(By.xpath("//td[4]"));
-				
-
-		// Get the text content of the element and print it
-
-		String stock = AvailableBalance.getText();
-		System.out.println("Current Stock = " + stock);
+		try {
+			WebElement SelectedMedication = driver.findElement(By.xpath("//td[1]"));
+			MedicationName1 = SelectedMedication.getText();
+			System.out.println("Medication Name = " + MedicationName1);
+		} catch (Exception e) {
+			System.out.println("Medication Name Not found: 0");
+		}
 
 		Thread.sleep(2000);
 
-		//Transfer In Process
+		try {
+			WebElement AvailableBalance = driver.findElement(By.xpath("//td[4]"));
+			stock = AvailableBalance.getText();
+			System.out.println("Current Stock = " + stock);
+		} catch (Exception e) {
+			System.out.println("Current Stock not found: 0");
+		}
+
+		Thread.sleep(2000);
+
+//Transfer In Process
 
 		driver.findElement(By.xpath("//button[normalize-space()='Transfer In']")).click();
 		Thread.sleep(2000);
@@ -93,14 +119,13 @@ public class TRansferINImprest extends Base{
 		driver.findElement(By.xpath("//p[@class='blue-button']")).click();
 		Thread.sleep(2000);
 
-		//Print the entered qty
+		// Print the entered qty
 
-		WebElement AddedBalance = driver.findElement(By.xpath("//div[@class='right-form-section-drug-container']//span[1]"));
+		WebElement AddedBalance = driver
+				.findElement(By.xpath("//div[@class='right-form-section-drug-container']//span[1]"));
 		String add = AddedBalance.getText().trim();
-		System.out.println("Added qty =  " + add);
+		System.out.println("Out qty =  " + add);
 		Thread.sleep(1000);
-
-	
 
 		String numericAdd = add.replaceAll("[^0-9]", "");
 		String numericStock = stock.replaceAll("[^0-9]", "");
@@ -111,7 +136,6 @@ public class TRansferINImprest extends Base{
 		String sumasString = String.valueOf(sum);
 		System.out.println("Total Balance = " + sum);
 		Thread.sleep(2000);
-
 		// Continue the process of transfer in
 
 		WebElement receiveTransferBtn = driver.findElement(By.xpath("//p[normalize-space()='Receive Transfer']"));
@@ -128,13 +152,26 @@ public class TRansferINImprest extends Base{
 
 		WebElement completeBtn = driver.findElement(By.xpath("//h3[normalize-space()='Complete']"));
 		completeBtn.click();
-		Thread.sleep(2000);
-		
-		
-		if(sumasString == stock ) {
-			TestUtil.writeDataTRansferINImprest(rownum++, stock, sumasString, "Pass");	
-		}else {
-			TestUtil.writeDataTRansferINImprest(rownum++, stock, sumasString, "Fail");	
+		Thread.sleep(3000);
+
+		WebElement againclickonsearchbtn = driver.findElement(By.xpath("//button[@class='button submit-button']"));
+		againclickonsearchbtn.click();
+		Thread.sleep(3000);
+
+// Print the final stock
+
+		WebElement AvailableBalance1 = driver.findElement(By.xpath("//td[4]"));
+		String stock2 = AvailableBalance1.getText();
+		String numericStock1 = stock2.replaceAll("[^0-9]", "");
+		System.out.println("Final Balance on the stoctake screen = " + numericStock1);
+		System.out.println("---------------------------------------------------");
+
+		Thread.sleep(3000);
+
+		if (sumasString.equals(numericStock1)) {
+		    TestUtil.writeDataTRansferINImprest(rownum++, stock, sumasString, "Pass");
+		} else {
+		    TestUtil.writeDataTRansferINImprest(rownum++, stock, sumasString, "Fail");
 		}
 	}
 }
