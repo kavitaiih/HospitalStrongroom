@@ -1,6 +1,7 @@
 package Testcase;
 
 import java.time.Duration;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -13,25 +14,29 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.annotations.DataProvider;
 import org.testng.asserts.SoftAssert;
 import org.testng.annotations.Test;
+import objects.NotificationPage;
 
 import test.Util.TestUtil;
 
 public class OutgoingPatient extends Base {
+	private static NotificationPage notificationPage;
 
-	private static int rownum = 2;
 
-	@DataProvider
-	public Iterator<Object[]> getTestData() {
-		ArrayList<Object[]> testData = TestUtil.outgoingpatient();
-		return testData.iterator();
-	}
-
-	@Test(dataProvider = "getTestData")
-	public void outgoingpatient(String Medication_name, String Patient_Name, String note, String quantity, String pin)
+//	private static int rownum = 2;
+//
+//	@DataProvider
+//	public Iterator<Object[]> getTestData() {
+//		ArrayList<Object[]> testData = TestUtilOld.outgoingpatient();
+//		return testData.iterator();
+//	}
+//
+//	@Test(dataProvider = "getTestData")
+	public static void outgoingpatient(String action, String Medication_name, String transaction_id, String Patient_Name, String note, String Quantity, String username, String pin)
 			throws InterruptedException {
 
 		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5000));
 		SoftAssert softAssert = new SoftAssert();
+		TaskName = action ;
 		driver.findElement(By.xpath("//p[normalize-space()='Stock']")).click();
 		Thread.sleep(2000);
 
@@ -87,7 +92,7 @@ public class OutgoingPatient extends Base {
 	        String RemainingasString = "-";
 	        
 	        // Write default values to Excel or perform any necessary action
-	        TestUtil.writeDataoutgoingpatient(rownum++, stock, RemainingasString, "Fail");
+	        //TestUtilOld.writeDataoutgoingpatient(rownum++, stock, RemainingasString, "Fail");
 	        //return; // This will exit the current method, allowing the program to continue
 	    }
 
@@ -101,7 +106,7 @@ public class OutgoingPatient extends Base {
 
 			if (intValue == 0) {
 				Thread.sleep(2000);
-				inputdata = "\n"  + "Medication Name: " + Medication_name
+				inputdata ="\n"+ "Transaction Type: " +action +  "\n"  + "Medication Name: " + Medication_name
 						+ "\n" + "Patient Name: " + Patient_Name + "\n" + "Medication QTY is found: Zero " + stock
 						+ "\n";;
 				
@@ -185,7 +190,8 @@ public class OutgoingPatient extends Base {
 		if ("No results found".equals(NoMedication)) {
 			System.out.println("Medication not selected: " + NoMedication);
 			Thread.sleep(2000);
-			inputdata = "Medication Name:  " + Medication_name  + "\n"
+			inputdata = "\n"+ "Transaction Type: " +action +"\n" + "Transferin Imprest Drug Name: "
+					+ Medication_name + "\n" 
 					+ "Patient Name:  " + Patient_Name + "\n"
 					+ "Entry for this medication for selected patient is not found: " + "\n" + "Result:  " +NoMedication + "\n";
 			;
@@ -207,7 +213,7 @@ public class OutgoingPatient extends Base {
 		WebElement qty = wait
 				.until(ExpectedConditions.elementToBeClickable(By.xpath("//input[@placeholder='Quantity']")));
 		qty.clear();
-		qty.sendKeys(quantity);
+		qty.sendKeys(Quantity);
 		
 		Thread.sleep(2000);
 
@@ -241,10 +247,16 @@ public class OutgoingPatient extends Base {
 				ExpectedConditions.elementToBeClickable(By.xpath("//p[@class='regular-button complete-button']")));
 		submitbtn.click();
 		Thread.sleep(2000);
+		WebElement usernameInput = wait
+				.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//input[@placeholder='Username']")));
+		usernameInput.click();
+		usernameInput.clear();
+		usernameInput.sendKeys(username);
+		Thread.sleep(2000);
 
 		WebElement enterpass = wait
 				.until(ExpectedConditions.elementToBeClickable(By.xpath("//input[@placeholder='Password']")));
-		enterpass.sendKeys("1111");
+		enterpass.sendKeys(pin);
 		Thread.sleep(2000);
 
 		WebElement pwd1 = wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//div[@class='green-button']")));
@@ -259,6 +271,29 @@ public class OutgoingPatient extends Base {
 		searchbtn.click();
 		Thread.sleep(2000);
 		
+		String MedicationName2 = "0"; // Default value in case element not found
+		//String stock1 = "0"; // Default value in case element not found
+		String PatientName2 = "0";
+		
+		try {
+			WebElement SelectedMedication1 = driver.findElement(By.xpath("//td[1]"));
+			MedicationName2 = SelectedMedication1.getText();
+			//System.out.println("Medication Name = " + MedicationName2);
+		} catch (Exception e) {
+			//System.out.println("Entry for this medication is not found");
+		}
+		
+		Thread.sleep(3000);
+
+		try {
+			WebElement SelectedPatient1 = driver.findElement(By.xpath("//td[2]"));
+			PatientName2 = SelectedPatient1.getText();
+			System.out.println("Patient Name = " + PatientName2);
+		} catch (Exception e) {
+			//System.out.println("Patient Name not found: 0");
+		}
+		Thread.sleep(3000); 
+		
 
 		// Compare the values
 		WebElement AvailableBalance1 = driver.findElement(By.xpath("//td[4]"));
@@ -269,10 +304,18 @@ public class OutgoingPatient extends Base {
 
 		Thread.sleep(3000);
 		
-		inputdata = "\n" + "Transferin Imprest Drug Name: "
+		inputdata ="\n"+ "Transaction Type: " +action+ "\n" + "Transferin Imprest Drug Name: "
 				+ Medication_name +"\n" + "Patient Name" + Patient_Name + "\n" + " Outgoing qty:  " + abc
-				+ "\n" + "Current Stock: " + stock + "\n" + "Final Stock: " + RemainingasString + "\n";
-		;
+				+ "\n" + "Current Stock: " + stock + "\n" + "Final Stock: " + RemainingasString + "\n";;
+		
+
+				Object action1 = null;
+				Object Task_Name = action1;
+				
+				softAssert.assertEquals(numericStock1, RemainingasString, "final stock is not match with Expected stock");
+				softAssert.assertEquals(Medication_name, MedicationName2, "Resident Name mismatch");
+				softAssert.assertEquals(Patient_Name, PatientName2, "Patient Name mismatch");
+				softAssert.assertAll();
 
 //		if (RemainingasString.equals(numericStock1)) {
 //			TestUtil.writeDataoutgoingpatient(rownum++, stock, RemainingasString, "Pass");

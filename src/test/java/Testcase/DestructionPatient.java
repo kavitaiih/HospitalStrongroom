@@ -1,6 +1,6 @@
 package Testcase;
-
 import java.time.Duration;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -11,27 +11,32 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.annotations.DataProvider;
 import org.testng.asserts.SoftAssert;
+import objects.NotificationPage;
 
 import org.testng.annotations.Test;
 
 import test.Util.TestUtil;
 
 public class DestructionPatient extends Base {
-	private static int rownum = 2;
+	private static NotificationPage notificationPage;
 
-	@DataProvider
-	public Iterator<Object[]> getTestData() {
-		ArrayList<Object[]> testData =TestUtil.DestructionwithPatient();
-		return testData.iterator();
-		
-	}
-
-	@Test(dataProvider="getTestData")
-	public void destruction(String Medication_name, String Patient_Name, String Prescriber_Name, String Quantity, String Current_Stock, String Remaining_Balance, String pin, String note, String location, String Status) throws InterruptedException {
+//	private static int rownum = 2;
+//
+//	@DataProvider
+//	public Iterator<Object[]> getTestData() {
+//		ArrayList<Object[]> testData =TestUtilOld.DestructionwithPatient();
+//		return testData.iterator();
+//		
+//	}
+//
+//	@Test(dataProvider="getTestData")
+	public static void destructionPatient(String action, String location, String Medication_name, String transaction_id, String note,  String Patient_Name, String Prescriber_Name, String Quantity, String username, String pin) 
+			throws InterruptedException {
 		
 		// Print the Present available balance of that Medicaiton on the Stocktake 
 		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5000));
 		SoftAssert softAssert = new SoftAssert();
+		TaskName = action ;
 		
 		driver.findElement(By.xpath("//p[normalize-space()='Stock']")).click();
 		Thread.sleep(2000);
@@ -90,7 +95,7 @@ public class DestructionPatient extends Base {
 	        String RemainingasString = "-";
 	        
 	        // Write default values to Excel or perform any necessary action
-	        TestUtil.writeDataDestructionwithPatient(rownum++, stock, RemainingasString, "Fail");
+	       // TestUtilOld.writeDataDestructionwithPatient(rownum++, stock, RemainingasString, "Fail");
 	        //return; // This will exit the current method, allowing the program to continue
 	    }
 
@@ -104,11 +109,11 @@ public class DestructionPatient extends Base {
 
 			if (intValue == 0) {
 				Thread.sleep(2000);
-				inputdata = "\n" + "Transfer out Location: " + location + "\n" + "Medication Name: " + Medication_name
+				//TaskName = action ;
+				inputdata ="\n"+ "Transaction Type: " +action +  "\n" + "Transfer out Location: " + location + "\n" + "Medication Name: " + Medication_name
 						+ "\n" + "Patient Name: " + Patient_Name + "\n" + "Medication QTY is found: Zero " + stock
 						+ "\n";
-				;
-
+				
 				softAssert.assertEquals("0", stock,
 						"Initial Stock is 0, that's why the process of transfer out is not possible");
 				System.out.println(stock);
@@ -144,7 +149,7 @@ public class DestructionPatient extends Base {
 		driver.findElement(By.xpath("//button[normalize-space()='New Destruction']")).click();
 		Thread.sleep(2000);
 
-		driver.findElement(By.xpath("//textarea[@id='note-modal']")).sendKeys("Notes Will be here");
+		driver.findElement(By.xpath("//textarea[@id='note-modal']")).sendKeys(note);
 		
 		driver.findElement(By.xpath("//p[normalize-space()='Patient Medication']")).click();
 		
@@ -165,7 +170,7 @@ public class DestructionPatient extends Base {
 		WebElement ClickONmedicationINPUT = wait.until(
 				ExpectedConditions.elementToBeClickable(By.xpath("/html[1]/body[1]/div[2]/div[1]/div[1]/input[1]")));
 		ClickONmedicationINPUT.sendKeys(Medication_name);
-		Thread.sleep(5000);
+		Thread.sleep(3000);
 
 		WebElement nomedicationnamefound = driver.findElement(By.xpath("/html[1]/body[1]/div[2]/div[2]/ul[1]/li[1]")); // NO
 																														// MEDICATION
@@ -175,7 +180,8 @@ public class DestructionPatient extends Base {
 		if ("No results found".equals(NoMedication)) {
 			System.out.println("Medication not selected: " + NoMedication);
 			Thread.sleep(2000);
-			inputdata = "Transfer out Location: " + location + "\n" + "Medication Name: " + Medication_name + "\n"
+			//TaskName = action ;
+			inputdata = "\n"+ "Transaction Type: " +action + "\n" +"Transfer out Location: " + location + "\n" + "Medication Name: " + Medication_name + "\n"
 					+ "Patient Name" + Patient_Name + "\n"
 					+ "Entry for this medication for selected patient is not found: " + NoMedication + "\n";
 			;
@@ -185,12 +191,9 @@ public class DestructionPatient extends Base {
 			return;
 		} else {
 			// System.out.println("Medication selected: " + Medication_name);
-			WebElement clickonmedication = driver.findElement(By.xpath("/html[1]/body[1]/div[2]/div[2]/ul[1]")); // SELECT
-			String Test = clickonmedication.getText();
-			// System.out.println(Test);// MEDICATION
-			Thread.sleep(2000);
+			WebElement clickonmedication = driver.findElement(By.xpath("/html[1]/body[1]/div[2]/div[2]/ul[1]/li[1]/div[1]/div[1]/div[1]")); // SELECT
 			clickonmedication.click(); // SELECT THE MEDICATION
-
+			Thread.sleep(2000);
 		}
 
 		// Close the dropdown (assuming it opens after selection)
@@ -227,8 +230,15 @@ public class DestructionPatient extends Base {
 
 		driver.findElement(By.xpath("//p[normalize-space()='Destroy']")).click();
 		Thread.sleep(2000);
+		
+		WebElement usernameInput = wait
+				.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//input[@placeholder='Username']")));
+		usernameInput.click();
+		usernameInput.clear();
+		usernameInput.sendKeys(username);
+		Thread.sleep(2000);
 
-		driver.findElement(By.xpath("//input[@placeholder='Password']")).sendKeys("1111");
+		driver.findElement(By.xpath("//input[@placeholder='Password']")).sendKeys(pin);
 		Thread.sleep(2000);
 
 		driver.findElement(By.xpath("//div[@class='green-button']")).click();
@@ -237,8 +247,31 @@ public class DestructionPatient extends Base {
 		driver.findElement(By.xpath("//h3[normalize-space()='Complete']")).click();
 		Thread.sleep(2000);
 		
-		driver.findElement(By.xpath("//button[@class='button submit-button']")).click();
+		driver.findElement(By.xpath("//button[@class='button submit-button']")).click(); //click on search button stocktake screen
 		Thread.sleep(2000);
+		
+		String MedicationName2 = "0"; // Default value in case element not found
+		//String stock1 = "0"; // Default value in case element not found
+		String PatientName2 = "0";
+		
+		try {
+			WebElement SelectedMedication1 = driver.findElement(By.xpath("//td[1]"));
+			MedicationName2 = SelectedMedication1.getText();
+			//System.out.println("Medication Name = " + MedicationName2);
+		} catch (Exception e) {
+			//System.out.println("Entry for this medication is not found");
+		}
+		
+		Thread.sleep(3000);
+
+		try {
+			WebElement SelectedPatient1 = driver.findElement(By.xpath("//td[2]"));
+			PatientName2 = SelectedPatient1.getText();
+			System.out.println("Patient Name = " + PatientName2);
+		} catch (Exception e) {
+			//System.out.println("Patient Name not found: 0");
+		}
+		Thread.sleep(3000);
 	
 		//Compare the values 
 				WebElement AvailableBalance1 = driver.findElement(By.xpath("//td[4]"));
@@ -248,10 +281,19 @@ public class DestructionPatient extends Base {
 				System.out.println("---------------------------------------------------");
 
 				Thread.sleep(3000);
-				inputdata = "\n" + "Transfer In Imprest Location: " + location + "\n" + "Transferin Imprest Drug Name: "
+				//TaskName = action ;
+				inputdata = "\n"+ "Transaction Type: " +action + "\n" + "Transfer In Imprest Location: " + location + "\n" + "Transferin Imprest Drug Name: "
 						+ Medication_name + "Patient Name" + Patient_Name + "\n" + "Transferin Imprest in quantity:  " + abc
-						+ "\n" + "Current Stock: " + stock + "\n" + "Final Stock: " + RemainingasString + "\n";
-				;
+						+ "\n" + "Current Stock: " + stock + "\n" + "Final Stock: " + RemainingasString + "\n";;
+						
+						Object action1 = null;
+						Object Task_Name = action1;
+						
+						softAssert.assertEquals(numericStock1, RemainingasString, "final stock is not match with Expected stock");
+						softAssert.assertEquals(Medication_name, MedicationName2, "Resident Name mismatch");
+						softAssert.assertEquals(Patient_Name, PatientName2, "Patient Name mismatch");	
+						softAssert.assertAll();
+
 
 //
 //				if (RemainingasString.equals(numericStock1)) {

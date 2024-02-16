@@ -13,20 +13,29 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import test.Util.TestUtil;
+import org.testng.asserts.SoftAssert;
+import objects.NotificationPage;
+
 
 public class Dispensing extends Base {
+	private static NotificationPage notificationPage;
 
-	private static int rownum = 2;
 
-	@DataProvider
-	public Iterator<Object[]> getTestData() {
-		ArrayList<Object[]> testData = TestUtil.dipensing();
-		return testData.iterator();
-	}
-
-	@Test(dataProvider = "getTestData")
-	public void Dispensingmedication(String Medication_name, String Patient_Name, String note, String Prescriber_Name,
-			String Quantity, String PIN) throws InterruptedException {
+//	private static int rownum = 2;
+//
+//	@DataProvider
+//	public Iterator<Object[]> getTestData() {
+//		ArrayList<Object[]> testData = TestUtilOld.dipensing();
+//		return testData.iterator();
+//	}
+//
+//	@Test(dataProvider = "getTestData")
+	public static void Dispensingmedication(String action, String Reference_Number, String note, String Patient_Name, String Prescriber_Name, String Medication_name,   
+	        String Quantity, String username, String pin) throws InterruptedException {
+		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5000));
+		SoftAssert softAssert = new SoftAssert();
+		TaskName = action ;
+		
 
 		// Check the stock on the medidcation
 
@@ -91,7 +100,7 @@ public class Dispensing extends Base {
 			String RemainingasString = "-";
 
 			// Write default values to Excel or perform any necessary action
-			TestUtil.writeDatadipensing(rownum++, stock, RemainingasString, "Fail");
+			//TestUtilOld.writeDatadipensing(rownum++, stock, RemainingasString, "Fail");
 			// This will exit the current method, allowing the program to continue
 
 		}
@@ -101,12 +110,33 @@ public class Dispensing extends Base {
 		try {
 			WebElement AvailableBalance = driver.findElement(By.xpath("//td[4]"));
 			stock = AvailableBalance.getText();
+			String numericStock = stock.replaceAll("[^0-9]", "");
+			int intValue = Integer.parseInt(numericStock);
+
+			if (intValue == 0) {
+				Thread.sleep(2000);
+				inputdata = "\n"+ "Transaction Type: " +action + "\n" +  "\n" + "Medication Name: " + Medication_name
+						+ "\n" + "Patient Name: " + Patient_Name + "\n" + "Medication QTY is found: Zero " + stock
+						+ "\n";
+				
+
+				softAssert.assertEquals("0", stock,
+						"Initial Stock is 0, that's why the process of transfer out is not possible");
+				System.out.println(stock);
+				System.out.println(intValue);
+
+				softAssert.assertAll();
+
+				return;
+			} else {
+				// System.out.println("Continue");
+			}
 			System.out.println("Current Stock = " + stock);
 		} catch (Exception e) {
+			e.printStackTrace(); // print the stack trace for debugging
 			System.out.println("Current Stock not found: 0");
-			stock = "-"; // Set default value for stock if not found
+			stock = "-";
 		}
-
 		Thread.sleep(2000);
 
 		try {
@@ -123,7 +153,7 @@ public class Dispensing extends Base {
 		driver.findElement(By.xpath("//button[normalize-space()='Dispensing']")).click();
 		Thread.sleep(2000);
 
-		driver.findElement(By.xpath("//input[@id='refnum']")).sendKeys("12345");
+		driver.findElement(By.xpath("//input[@id='refnum']")).sendKeys(Reference_Number);
 		Thread.sleep(2000);
 
 		driver.findElement(By.xpath("//textarea[@id='note-modal']")).sendKeys(note); // Take not from excel
@@ -164,6 +194,15 @@ public class Dispensing extends Base {
 
 		if ("No available options".equals(NoMedication)) {
 			System.out.println("Medication not selected: " + NoMedication);
+			Thread.sleep(2000);
+			inputdata = "\n"+ "Transaction Type: " +action + "\n" +  "\n" + "Medication Name: " + Medication_name + "\n"
+					+ "Patient Name" + Patient_Name + "\n"
+					+ "Entry for this medication for selected patient is not found: " + NoMedication + "\n";
+			;
+
+			softAssert.assertEquals(NoMedication, Medication_name, "final stock is not match with Expected stock");
+			softAssert.assertAll();
+			return;
 		} else {
 			System.out.println("Medication selected: " + Medication_name);
 			WebElement clickonmedication = driver
@@ -198,14 +237,21 @@ public class Dispensing extends Base {
 		int abc = Integer.parseInt(numericAdd);
 		int Remaining = intValue - abc;
 		String RemainingasString = String.valueOf(Remaining);
-		System.out.println("Remaining Balance = " + Remaining);
+		System.out.println("Remaining Balance = " + RemainingasString);
 		Thread.sleep(2000);
 
 //Continue the despensing process		
 		driver.findElement(By.xpath("//p[normalize-space()='Dispense']")).click();
 		Thread.sleep(2000);
+		
+		WebElement usernameInput = wait
+				.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//input[@placeholder='Username']")));
+		usernameInput.click();
+		usernameInput.clear();
+		usernameInput.sendKeys(username);
+		Thread.sleep(2000);
 
-		driver.findElement(By.xpath("//input[@placeholder='Password']")).sendKeys("1111"); // enter password from excel
+		driver.findElement(By.xpath("//input[@placeholder='Password']")).sendKeys(pin); // enter password from excel
 		Thread.sleep(2000);
 
 		driver.findElement(By.xpath("//div[@class='green-button']")).click(); // sign in btn
@@ -214,9 +260,30 @@ public class Dispensing extends Base {
 		driver.findElement(By.xpath("//h3[normalize-space()='Complete']")).click(); // complete btn
 		Thread.sleep(3000);
 
-		driver.findElement(By.xpath("//button[@class='button submit-button']")).click(); // Again search the same drug
-																							// on the stocktake screen
+		driver.findElement(By.xpath("//button[@class='button submit-button']")).click(); // Again search the same drug on the stocktake screen
+		Thread.sleep(3000);
+		
+		String MedicationName2 = "0"; // Default value in case element not found
+		//String stock1 = "0"; // Default value in case element not found
+		String PatientName2 = "0";
+		
+		try {
+			WebElement SelectedMedication1 = driver.findElement(By.xpath("//td[1]"));
+			MedicationName2 = SelectedMedication1.getText();
+			//System.out.println("Medication Name = " + MedicationName2);
+		} catch (Exception e) {
+			//System.out.println("Entry for this medication is not found");
+		}
+		
+		Thread.sleep(3000);
 
+		try {
+			WebElement SelectedPatient1 = driver.findElement(By.xpath("//td[2]"));
+			PatientName2 = SelectedPatient1.getText();
+			System.out.println("Patient Name = " + PatientName2);
+		} catch (Exception e) {
+			//System.out.println("Patient Name not found: 0");
+		}
 		Thread.sleep(3000);
 
 //Print New Balance
@@ -228,13 +295,27 @@ public class Dispensing extends Base {
 		System.out.println("---------------------------------------------------");
 
 		Thread.sleep(3000);
+		
+		Thread.sleep(3000);
 
-		if (RemainingasString.equals(numericStock1)) {
-			TestUtil.writeDatadipensing(rownum++, stock, RemainingasString, "Pass");
-		} else {
-			TestUtil.writeDatadipensing(rownum++, stock, RemainingasString, "Fail");
-			Thread.sleep(3000);
-		}
+		inputdata = "\n"+ "Transaction Type: " +action + "\n" + "\n" + "Transferin Imprest Drug Name: "
+				+ Medication_name + "\n" + "Patient Name:  " + Patient_Name + "\n" + "Transferin Imprest in quantity:  " + abc
+				+ "\n" + "Current Stock: " + stock + "\n" + "Final Stock: " + RemainingasString + "\n";;
+		
+				Object action1 = null;
+				Object Task_Name = action1;
+				
+				softAssert.assertEquals(numericStock1, RemainingasString, "final stock is not match with Expected stock");
+				softAssert.assertEquals(Medication_name, MedicationName2, "Resident Name mismatch");
+				softAssert.assertEquals(Patient_Name, PatientName2, "Patient Name mismatch");
+				softAssert.assertAll();
+
+//		if (RemainingasString.equals(numericStock1)) {
+//			TestUtilOld.writeDatadipensing(rownum++, stock, RemainingasString, "Pass");
+//		} else {
+//			TestUtilOld.writeDatadipensing(rownum++, stock, RemainingasString, "Fail");
+//			Thread.sleep(3000);
+//		}
 
 	}
 }

@@ -5,10 +5,13 @@ import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.NoSuchElementException;
 
 import org.apache.commons.io.FileUtils;
 import org.openqa.selenium.By;
+import org.openqa.selenium.ElementNotInteractableException;
 import org.openqa.selenium.OutputType;
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -31,7 +34,9 @@ import io.github.bonigarcia.wdm.WebDriverManager;
 public class Base extends createTask implements ITestListener {
     static WebDriver driver;
     protected static String inputdata;
-    public String loginTaskDescription;  // Declare at the class level
+    public String loginTaskDescription;
+    // Declare at the class level
+    protected static String TaskName ;
 
     @BeforeSuite
     public void start() {
@@ -75,7 +80,7 @@ public class Base extends createTask implements ITestListener {
         WebElement passwordInput = driver.findElement(By.xpath("//input[@placeholder='Password']"));
         passwordInput.clear();
         passwordInput.sendKeys("stew-dazzling-washtub!");
-        Thread.sleep(2000);
+        Thread.sleep(1000);
 
 
         String loginPageURL = driver.getCurrentUrl();
@@ -83,7 +88,7 @@ public class Base extends createTask implements ITestListener {
         String  enteredUsername = usernameInput.getAttribute("value");
         String enteredPassword = passwordInput.getAttribute("value");
         String selectedLocation = "Pharmacy";
-        Thread.sleep(3000);
+        Thread.sleep(1000);
         
 
         WebElement loginButton = driver.findElement(By.xpath("//p[@class='blue-button']"));
@@ -112,12 +117,10 @@ public class Base extends createTask implements ITestListener {
                 "Entered Location: " + enteredLocation + "\n" +
                 "Entered Username: " + enteredUsername + "\n" +
                 "Entered Password: " + enteredPassword + "\n" +
-                "Selected Location: " + selectedLocation;
-        
+                "Selected Location: " + selectedLocation;      
         
     } 
     
-
 
     public void failed(String testMethodName) {
         File scrFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
@@ -144,15 +147,16 @@ public class Base extends createTask implements ITestListener {
             createClickUpTask(formattedDateTime, taskDescription, listId, status); 
             // this method create one task with current date and time
             
-            String methodName = result.getMethod().getMethodName();
+            String methodName = TaskName;
             String consoleError = extractConsoleError(result);
             //String loginTaskDescription1 = null;
-			String fails =  inputdata + "\n" + consoleError + "Status" + status;
-            createClickUpTask(methodName, fails, listId, status); 
+			String fails =  loginTaskDescription + "\n" + inputdata + "\n" +  "Status: " + status + "\n" + "Error message: "
+					+ consoleError;
+            createClickUpTask(TaskName, fails, listId, status); 
             // This method create task which is failed test case
-            
+                       
             String mainTaskId = getTaskId(formattedDateTime, listId);
-            String subTaskId = getTaskId(methodName, listId);
+            String subTaskId = getTaskId(TaskName, listId);
             updateTask(subTaskId, mainTaskId);  
             // this method move the fail test case task into current date and time task and make it sub task
         } else {
@@ -164,15 +168,15 @@ public class Base extends createTask implements ITestListener {
             createClickUpTask(formattedDateTime, taskDescription, listId, status);  
             // this method create one task with current date and time
             
-            String methodName = result.getMethod().getMethodName();
+            String methodName = TaskName;
             String consoleError = extractConsoleError(result);
             
-			String fails = inputdata + "\n" + consoleError + "Status" + status;
-            createClickUpTask(methodName, fails, listId, status); 
+			String fails = loginTaskDescription + "\n" + inputdata + "\n" + consoleError + "Status: " + status;
+            createClickUpTask(TaskName, fails, listId, status); 
             // This method create task which is pass test case
             
             String mainTaskId = getTaskId(formattedDateTime, listId);
-            String subTaskId = getTaskId(methodName, listId);
+            String subTaskId = getTaskId(TaskName, listId);
             updateTask(subTaskId, mainTaskId);  
             // this method move the pass test case task into current date and time task and make it sub task
         }
@@ -204,4 +208,25 @@ public class Base extends createTask implements ITestListener {
     public void report() {
     	
     }
+    public static WebElement findElementWithRetry(WebDriver driver, By by) {
+	    WebElement element = null;
+	    int maxAttempts = 3;
+	    int attempt = 0;
+	    while (attempt < maxAttempts) {
+	        try {
+	            element = driver.findElement(by);
+	            if (element != null && element.isDisplayed() && !element.getText().isEmpty()) {
+	            	System.out.println("Attempts fail" + attempt);
+	                break;
+	            }
+	        } catch (NoSuchElementException | StaleElementReferenceException | ElementNotInteractableException e) {
+	        	 System.out.println("Exception occurred: " + e.getMessage());
+	        	    // print stack trace
+	        	    e.printStackTrace();
+	        }
+	        attempt++;
+	    }
+	    return element;
+	}
+    
 }

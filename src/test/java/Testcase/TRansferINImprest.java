@@ -1,6 +1,9 @@
 package Testcase;
 
+import java.time.Duration;
+
 import java.util.ArrayList;
+
 import org.openqa.selenium.NoSuchElementException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -8,26 +11,33 @@ import java.util.Iterator;
 import java.util.Iterator;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+import org.testng.asserts.SoftAssert;
+import objects.NotificationPage;
+
 import test.Util.TestUtil;
-
 public class TRansferINImprest extends Base {
+private static NotificationPage notificationPage;
 
-	private static int rownum = 2;
+//	private static int rownum = 2;
+//
+//	@DataProvider
+//	public Iterator<Object[]> getTestData() {
+//		ArrayList<Object[]> testData = TestUtil.TRansferINImprest();
+//		return testData.iterator();
+//	}
+//
+//	@Test(dataProvider = "getTestData") traansferInIpmrest
+	public static void transferInIpmrest(String action, String location, String note, String Medication_name,  String Quantity, String username,  String pin ) 
+			throws InterruptedException {
 
-	@DataProvider
-	public Iterator<Object[]> getTestData() {
-		ArrayList<Object[]> testData = TestUtil.TRansferINImprest();
-		return testData.iterator();
-	}
+		SoftAssert softAssert = new SoftAssert();
+		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5000));
+		TaskName = action ;
 
-	@Test(dataProvider = "getTestData")
-	public void traansferInPrescriber(String Medication_name, String Quantity, String Current_Stock,
-			String Total_Balance, String pin, String note, String location, String Status) throws InterruptedException {
-
-		// Set the log level for PoolingHttpClientConnectionManager to a higher level
-		// (e.g., INFO or higher)
 
 		driver.findElement(By.xpath("//p[normalize-space()='Stock']")).click();
 		Thread.sleep(2000);
@@ -69,24 +79,26 @@ public class TRansferINImprest extends Base {
 
 		String MedicationName1 = "0"; // Default value in case element not found
 		String stock = "0"; // Default value in case element not found
-		// String PatientName1 = "0"; //Default value in case element not found
-
 		try {
 			WebElement SelectedMedication = driver.findElement(By.xpath("//td[1]"));
 			MedicationName1 = SelectedMedication.getText();
 			System.out.println("Medication Name = " + MedicationName1);
 		} catch (Exception e) {
-			System.out.println("Medication Name Not found: 0");
+			System.out.println("Entry for this medication is not found");
+			
 		}
-
 		Thread.sleep(2000);
 
 		try {
 			WebElement AvailableBalance = driver.findElement(By.xpath("//td[4]"));
 			stock = AvailableBalance.getText();
+			String numericStock = stock.replaceAll("[^0-9]", "");
+			int intValue = Integer.parseInt(numericStock);
+		
 			System.out.println("Current Stock = " + stock);
 		} catch (Exception e) {
-			System.out.println("Current Stock not found: 0");
+			e.printStackTrace(); // print the stack trace for debugging
+			
 		}
 
 		Thread.sleep(2000);
@@ -108,10 +120,14 @@ public class TRansferINImprest extends Base {
 		driver.findElement(By.xpath("//p[normalize-space()='Imprest/Emergency Meds/Ward Stock']")).click();
 		Thread.sleep(2000);
 
-		driver.findElement(By.xpath("//input[@placeholder='Select Medication']")).sendKeys(Medication_name);
-		Thread.sleep(2000);
+		WebElement ClickONmedicationINPUT = wait.until(
+				ExpectedConditions.elementToBeClickable(By.xpath("//input[@placeholder='Select Medication']")));
+		ClickONmedicationINPUT.sendKeys(Medication_name);
+		Thread.sleep(5000);
 
-		driver.findElement(By.xpath("/html[1]/body[1]/div[2]/div[1]/ul[1]/li[1]")).click();
+		
+			WebElement clickonmedication = driver.findElement(By.xpath("/html[1]/body[1]/div[2]/div[1]/ul[1]/li[1]")); // SELECT
+			clickonmedication.click(); // SELECT THE MEDICATION
 		Thread.sleep(2000);
 
 		driver.findElement(By.xpath("//input[@placeholder='Qty...']")).sendKeys(Quantity);
@@ -124,7 +140,7 @@ public class TRansferINImprest extends Base {
 		WebElement AddedBalance = driver
 				.findElement(By.xpath("//div[@class='right-form-section-drug-container']//span[1]"));
 		String add = AddedBalance.getText().trim();
-		System.out.println("Out qty =  " + add);
+		System.out.println("Transfer In  qty =  " + add);
 		Thread.sleep(1000);
 
 		String numericAdd = add.replaceAll("[^0-9]", "");
@@ -134,16 +150,23 @@ public class TRansferINImprest extends Base {
 		int abc = Integer.parseInt(numericAdd);
 		int sum = intValue + abc;
 		String sumasString = String.valueOf(sum);
-		System.out.println("Total Balance = " + sum);
+		System.out.println("Total Balance = " + sumasString);
 		Thread.sleep(2000);
 		// Continue the process of transfer in
 
 		WebElement receiveTransferBtn = driver.findElement(By.xpath("//p[normalize-space()='Receive Transfer']"));
 		receiveTransferBtn.click();
 		Thread.sleep(2000);
+		
+		WebElement usernameInput = wait
+				.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//input[@placeholder='Username']")));
+		usernameInput.click();
+		usernameInput.clear();
+		usernameInput.sendKeys(username);
+		Thread.sleep(2000);
 
 		WebElement passwordInput = driver.findElement(By.xpath("//input[@placeholder='Password']"));
-		passwordInput.sendKeys("1111");
+		passwordInput.sendKeys(pin);
 		Thread.sleep(2000);
 
 		WebElement signInBtn = driver.findElement(By.xpath("//div[@class='green-button']"));
@@ -157,6 +180,17 @@ public class TRansferINImprest extends Base {
 		WebElement againclickonsearchbtn = driver.findElement(By.xpath("//button[@class='button submit-button']"));
 		againclickonsearchbtn.click();
 		Thread.sleep(3000);
+		
+		String MedicationName2 = "0"; // Default value in case element not found
+		
+		
+		try {
+			WebElement SelectedMedication1 = driver.findElement(By.xpath("//td[1]"));
+			MedicationName2 = SelectedMedication1.getText();
+		} catch (Exception e) {
+		}
+		
+		Thread.sleep(3000);
 
 // Print the final stock
 
@@ -167,11 +201,18 @@ public class TRansferINImprest extends Base {
 		System.out.println("---------------------------------------------------");
 
 		Thread.sleep(3000);
+		
+		inputdata = "\n"+ "Transaction Type: " +action + "\n" + "Transfer In Imprest Location: " + location + "\n" + "Transferin Imprest Drug Name: "
+				+ Medication_name + "\n" + "Transferin Imprest in quantity:  " + abc
+				+ "\n" + "Current Stock: " + stock + "\n" + "Final Stock: " + sumasString + "\n";;
+				
+				Object action1 = null;
+				Object Task_Name = action1;
+				
+				softAssert.assertEquals(numericStock1, sumasString, "final stock is not match with Expected stock");
+				softAssert.assertEquals(Medication_name, MedicationName2, "	Medication Name mismatch");
+				softAssert.assertAll();
 
-		if (sumasString.equals(numericStock1)) {
-		    TestUtil.writeDataTRansferINImprest(rownum++, stock, sumasString, "Pass");
-		} else {
-		    TestUtil.writeDataTRansferINImprest(rownum++, stock, sumasString, "Fail");
-		}
+	
 	}
 }
